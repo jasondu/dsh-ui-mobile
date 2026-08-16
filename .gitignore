@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Build output (tsdown bundles + tsc declarations)
+lib/
+dist/
+
+# Tooling artifacts
+*.tsbuildinfo
+*.tgz
+
+# Editor/OS noise
+.DS_Store

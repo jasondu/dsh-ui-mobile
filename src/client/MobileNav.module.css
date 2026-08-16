@@ -1,0 +1,76 @@
+.nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  background: var(--dsw-alias-bg-base);
+  border-top: 1px solid var(--dsw-alias-border-l1);
+}
+
+/* The bar is a phone-tier surface; the mobile sheet's reserved bottom strip
+   only exists under 768px, so the bar hides itself on wider viewports. */
+.desktopHidden {
+  display: none;
+}
+
+.button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.button:active {
+  background: var(--dsw-alias-button-ghost-active-fill);
+}
+
+.button[aria-pressed='true'] {
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-button-ghost-active-fill);
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* Tap-outside-to-close: covers everything below the drawer (z 40) and above
+   the nav bar (z 30) within the frame's overlay layer (z 20). */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  border: none;
+  padding: 0;
+  background: rgb(0 0 0 / 0.45);
+  touch-action: none;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav {
+    transition: none;
+  }
+}

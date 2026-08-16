@@ -1,0 +1,108 @@
+/**
+ * Global responsive sheet for the shell frame (side-effect import — the class
+ * map is unused). Targets stable data attributes only: the frame's column
+ * classes are CSS-module hashed and therefore unreachable from another plugin.
+ * ui-mobile stamps `data-mobile-frame` / `data-mobile-role` itself; the
+ * collapse attributes belong to AppFrame.
+ *
+ * Breakpoint: phone tier below 768px. Between 768px and the shell's own
+ * 1024px sidebar auto-collapse the existing three-column concession chain
+ * already degrades gracefully, so this sheet does not touch it.
+ */
+
+@media (max-width: 767px) {
+  /* The shell's full-height mount tracks the visible viewport on mobile
+     (URL-bar show/hide, on-screen keyboard). */
+  html,
+  body,
+  #root {
+    height: 100dvh;
+  }
+
+  body {
+    /* Keep the app's own scroll containers in control of pull gestures. */
+    overscroll-behavior-y: none;
+    /* iOS reflows/zooms text after orientation changes unless told not to. */
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Single-column frame: the conversation fills the screen. The inline px
+     grid template loses to !important here; the drawers below are taken out
+     of grid flow entirely. */
+  [data-mobile-frame] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  /* Drag handles are pointer affordances; the nav bar's buttons replace them. */
+  [data-mobile-frame] > [data-side] {
+    display: none;
+  }
+
+  /* ── sidebar: off-canvas drawer from the left ─────────────────────────── */
+  [data-mobile-role='sidebar'] {
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    width: min(84vw, 340px);
+    transform: translateX(-102%);
+    transition: transform 240ms var(--ds-ease-in-out, ease);
+    box-shadow: 0 0 32px rgb(0 0 0 / 0.35);
+  }
+
+  [data-mobile-frame]:not([data-sidebar-collapsed]) > [data-mobile-role='sidebar'] {
+    transform: translateX(0);
+  }
+
+  /* The sidebar shell freezes an inline width for its desktop slide; inside
+     the fixed drawer it must fill the drawer instead. */
+  [data-mobile-role='sidebar'] > * {
+    width: 100% !important;
+  }
+
+  /* ── details: full-height drawer from the right ───────────────────────── */
+  [data-mobile-role='details'] {
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 40;
+    width: min(100vw, 480px);
+    transform: translateX(102%);
+    transition: transform 240ms var(--ds-ease-in-out, ease);
+    box-shadow: 0 0 32px rgb(0 0 0 / 0.35);
+  }
+
+  [data-mobile-frame]:not([data-details-collapsed]) > [data-mobile-role='details'] {
+    transform: translateX(0);
+  }
+
+  /* The center column reserves the bottom strip the nav bar floats in, so
+     the composer (a flex child at the column's bottom edge) sits above it. */
+  [data-mobile-role='center'] {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+
+  /* iOS zooms focused inputs smaller than 16px — force readable type so the
+     composer and search fields keep their layout when focused. */
+  [data-mobile-role='center'] input,
+  [data-mobile-role='center'] textarea,
+  [data-mobile-role='center'] select {
+    font-size: 16px;
+  }
+
+  /* Kill the legacy 300ms double-tap zoom delay on interactive elements. */
+  [data-mobile-role='center'] button {
+    touch-action: manipulation;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-mobile-role='sidebar'],
+    [data-mobile-role='details'] {
+      transition: none;
+    }
+  }
+}
