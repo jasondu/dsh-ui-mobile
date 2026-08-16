@@ -1,33 +1,28 @@
 {
-  "extends": "../../../tsconfig.base.client.json",
   "compilerOptions": {
+    "target": "es2024",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "types": [],
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "verbatimModuleSyntax": false,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "rootDir": "src",
     "outDir": "lib/types"
   },
-  "include": [
-    "src"
-  ],
-  "references": [
-    {
-      "path": "../../../vendor/cordis"
-    },
-    {
-      "path": "../runtime"
-    },
-    {
-      "path": "../ui-layout"
-    },
-    {
-      "path": "../ui-primitives"
-    },
-    {
-      "path": "../ui-slots"
-    },
-    {
-      "path": "../web-react"
-    },
-    {
-      "path": "../../runtime-diagnostics/invariants"
-    }
-  ]
+  "include": ["src", "tests"]
 }

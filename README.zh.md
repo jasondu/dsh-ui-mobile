@@ -2,6 +2,17 @@
 
 [English](README.md) | 中文
 
+> **独立镜像。** 本仓库是从
+> [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)
+> （`packages/client/ui-mobile`）抽取出的 `ui-mobile` 客户端插件。源码以仓库内为准，此处为镜像副本。
+>
+> 该插件是 DSH **客户端插件**：不提供独立应用，只能在 DeepSeek Harness Web Shell 内运行。运行时对等依赖是
+> `@deepseek-ai/dsh-client-*` 系列包（restricted scope，目前尚未发布），因此在独立仓库执行 `pnpm install`
+> 需要先获得这些包（从 harness 仓库安装、私有 registry，或等待官方发布）。要在运行中的 GUI 使用它，请在
+> web bundle 的 `cordis.patch.yml` 中注册该行（`- id: ui-mobile / name: '@deepseek-ai/dsh-client-ui-mobile'`）。
+> `pnpm bundle` 产出 `lib/client.js`（浏览器 bundle）与 node 半区；`pnpm test` 运行 vitest 套件
+> （30 个测试，源码 100% 覆盖率）。
+
 Web Shell 的移动端插件：在 768px 以下，三栏 AppFrame 变为单栏会话视图，配有两个离屏抽屉——侧边栏从左滑入、详情面板从右滑入——由底部拇指可达的导航栏驱动。其余一切（平板宽度、Shell 自带的 1024px 侧边栏自动收起、拖拽调宽的面板）保持不变。
 
 该插件从不重写框架，而是读取已装配的 DOM。`MobileFrameController` 通过框架自身的 `data-shell-overlay` 子元素定位 AppFrame，为三个网格列打上稳定的 `data-mobile-role` 属性（其真实类名经 CSS Modules 哈希，其他插件无法触及），并把框架的 `data-sidebar-collapsed` / `data-details-collapsed` 翻转以及手机档 `matchMedia` 查询镜像为一份响应式快照。`mobile.module.css` 样式表（副作用导入）随后仅用属性选择器重构框架——以 `!important` 的单一 `minmax(0, 1fr)` 网格轨道压过框架的内联 px 模板，抽屉以 `position: fixed` 层脱离网格流，拖拽把手隐藏，中栏为底部导航栏预留出悬浮条带，使输入区始终位于其上。导航栏注册进框架的 `shell.overlay` 列表槽（`id: 'mobile-nav'`），因此是增量式的、默认点击穿透，并随插件 fiber 一起卸载；其 inject 面把两个按钮绑定到 `ctx.layout` 的面板动作（`toggleSidebar` / `openDetails` / `closeDetails`）以及控制器的订阅/快照对。打开的抽屉背后有一层遮罩，点按遮罩即可关闭。

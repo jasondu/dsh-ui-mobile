@@ -41,33 +41,34 @@
   },
   "scripts": {
     "bundle": "tsdown",
-    "watch": "tsdown --watch"
+    "watch": "tsdown --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run tests/"
   },
   "license": "MIT",
   "dependencies": {
     "clsx": "^2.0.0"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-layout": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-primitives": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-theme": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/cordis": "workspace:^",
+    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.5",
+    "@deepseek-ai/dsh-client-ui-layout": "^0.1.0-rc.5",
+    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.0-rc.5",
+    "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.5",
+    "@deepseek-ai/dsh-client-ui-theme": "^0.1.0-rc.5",
+    "@deepseek-ai/dsh-invariants": "^0.1.0-rc.5",
+    "@deepseek-ai/cordis": "^4.0.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-test-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-layout": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-primitives": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-theme": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "~18.3.1",
-    "react": "^18.2.0"
+    "jsdom": "^29.1.1",
+    "lightningcss": "^1.32.0",
+    "react": "^18.2.0",
+    "tsdown": "^0.22.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
   },
   "files": [
     "lib/index.js",
