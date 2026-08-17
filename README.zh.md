@@ -72,6 +72,7 @@ npm install dsh-ui-mobile@next
 - **iOS Safari**——没有安装 API，插件显示一次性提示：*分享 → 添加到主屏幕*。
 - **standalone 启动**——从主屏幕启动 GUI 使用 manifest 的 fullscreen 显示模式，浏览器外壳（含地址栏）完全消失。浏览器内直接访问仍保留地址栏——这是平台行为，不是缺陷。
 - **宿主已有的 PWA 标签会被替换**——若宿主已声明 manifest 或 iOS meta，插件会移除并以其自身版本取代，保证各部署行为一致。
+- **启动快且无白屏**——插件宿主半区在服务文档时注入启动骨架（深色背景 + 鲸鱼 logo），JS 加载窗口显示品牌反馈而非空白；并提供 app-shell Service Worker（`/sw.js`），其缓存策略让重复主屏幕启动接近瞬时（hash 资源 cache-first；文档保持 network-first，保证每次都能拿到最新的 `__DSH_BOOT__` rev）。
 
 更倾向于把 manifest 静态内置进 shell？`docs/pwa-host.patch` 携带同样的 manifest/图标/meta 作为纯 `apps/web` 改动（在 deepseek-harness 检出中 `git apply --binary`）。
 

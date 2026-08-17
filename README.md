@@ -73,6 +73,7 @@ The plugin makes the Web GUI an **installable PWA by itself** — no shell chang
 - **iOS Safari** — there is no install API, so the plugin shows a one-time hint: *Share → Add to Home Screen*.
 - **Standalone launch** — starting the GUI from the home screen uses the manifest's fullscreen display mode, so the browser chrome — including the URL bar — is gone. In-browser visits keep the URL bar; that is the platform's behavior, not a defect.
 - **Host-provided PWA tags are replaced** — if the host already declares a manifest or iOS meta, the plugin strips and supersedes them with its own, so behavior is consistent across deployments.
+- **Launch is fast and never white** — the plugin's host half injects a boot skeleton (dark background + whale logo) into the served document, so the JS-loading window shows brand feedback instead of a blank screen, and it serves an app-shell Service Worker (`/sw.js`) whose cache strategies make repeat home-screen launches near-instant (hashed assets cache-first; the document stays network-first so a fresh `__DSH_BOOT__` rev always lands).
 
 Prefer a static in-shell manifest instead? `docs/pwa-host.patch` carries the same manifest/icons/meta as plain `apps/web` changes (`git apply --binary` in a deepseek-harness checkout).
 

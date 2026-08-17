@@ -19,6 +19,7 @@ import { MobileFrameController } from './frame.ts'
 import { InstallController } from './install.ts'
 import { InstallBanner, type InstallBannerInjected } from './InstallBanner.tsx'
 import { MobileNav, type MobileNavInjected } from './MobileNav.tsx'
+import { registerServiceWorker } from './sw.ts'
 import './mobile.module.css'
 
 export type { MobileNavInjected } from './MobileNav.tsx'
@@ -30,12 +31,13 @@ export type { InstallState } from './install.ts'
 export const inject = ['layout', 'slots']
 
 /**
- * Client plugin body: start the frame and install controllers, then register
- * the nav bar and the install banner into the shell overlay once the frame
- * declares it.
+ * Client plugin body: register the app-shell service worker, start the frame
+ * and install controllers, then register the nav bar and the install banner
+ * into the shell overlay once the frame declares it.
  * @param ctx - client root context.
  */
 export function apply(ctx: ClientContext): void {
+  registerServiceWorker()
   const controller = new MobileFrameController()
   const install = new InstallController()
   ctx.effect(() => {
