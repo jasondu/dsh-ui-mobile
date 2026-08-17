@@ -1,34 +1,119 @@
 # dsh-ui-mobile
 
+[![npm version](https://img.shields.io/npm/v/dsh-ui-mobile)](https://www.npmjs.com/package/dsh-ui-mobile)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**Mobile client plugin for the [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web shell.**
+
 English | [中文](README.zh.md)
 
-> **Standalone mirror.** This repository is the `ui-mobile` client plugin extracted from
-> [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)
-> (`packages/client/ui-mobile`, published there as `@deepseek-ai/dsh-client-ui-mobile`).
-> The source is authoritative; the in-repo copy lives there.
->
-> The plugin is a DSH **client plugin**: it ships no standalone app and only runs inside the
-> DeepSeek Harness Web shell. Runtime peers are the `@deepseek-ai/dsh-client-*` packages
-> (a restricted npm scope, currently unpublished), so `pnpm install` in this standalone repo
-> resolves only after those packages are available (installed from the harness repo, a private
-> registry, or a future official release). To use the plugin in a running GUI, register the row
-> in the web bundle's `cordis.patch.yml` (`- id: dsh-ui-mobile / name: 'dsh-ui-mobile'`).
-> `pnpm bundle` emits `lib/client.js` (browser bundle) plus the node half and its
-> declarations (`lib/index.d.ts`, `lib/invariant.d.ts`, and the hand-written `client.d.ts`);
-> `pnpm test` runs the vitest suites (30 tests, 100% source coverage). Git installs run the
-> self-contained `prepare` script (`tsdown`) to build those entries from `src/`.
->
-> **Publishing.** The repo ships a GitHub Actions workflow (`.github/workflows/npm-publish.yml`):
-> push a version tag (`git tag v0.1.0-rc.5 && git push origin v0.1.0-rc.5`) or trigger it from
-> the Actions tab. Prerelease versions go to the `next` dist-tag, release versions to `latest`.
-> Configure the `NPM_TOKEN` repository secret (an npm token with publish rights for
-> `dsh-ui-mobile`) once — Settings → Secrets and variables → Actions.
+Below **768px** the Web GUI's three-column layout becomes a single conversation column with two off-canvas drawers — the session sidebar slides in from the left, the details panel from the right — driven by a thumb-reachable bottom nav bar. Desktop and tablet (768–1023px) layouts are untouched.
 
-Mobile plugin for the Web shell: below 768px the three-column AppFrame becomes a single conversation column with two off-canvas drawers — the sidebar slides in from the left and the details panel from the right — driven by a thumb-reachable bottom nav bar. Everything else (tablet widths, the shell's own 1024px sidebar auto-collapse, drag-resized panels) is untouched.
+> **Standalone mirror.** This repository is a mirror of `packages/client/ui-mobile` from
+> [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) (published there as
+> `@deepseek-ai/dsh-client-ui-mobile`). The harness copy stays authoritative; this repo ships the
+> same plugin as an installable npm package.
 
-The plugin never re-implements the frame: it reads the assembled DOM. `MobileFrameController` locates the AppFrame through its own `data-shell-overlay` child, stamps stable `data-mobile-role` attributes on the three grid columns (their real classes are CSS-module hashed and unreachable from another plugin), and mirrors the frame's `data-sidebar-collapsed` / `data-details-collapsed` flips plus the phone-tier `matchMedia` query into one reactive snapshot. The `mobile.module.css` sheet (side-effect import) then restructures the frame with plain attribute selectors — a single `minmax(0, 1fr)` grid track with `!important` beats the frame's inline px template, the drawers leave grid flow as `position: fixed` layers, drag handles hide, and the center column reserves the bottom strip the nav bar floats in so the composer stays clear of it. The nav bar registers into the frame's `shell.overlay` list slot (`id: 'mobile-nav'`), so it is additive, click-through by default, and torn down with the plugin fiber; its inject face binds the two buttons to `ctx.layout`'s panel actions (`toggleSidebar` / `openDetails` / `closeDetails`) and to the controller's subscribe/snapshot pair. A scrim behind an open drawer closes it on tap.
+## Features
 
-The phone tier also carries the usual touch-first hygiene: `100dvh` mounting (URL-bar and keyboard show/hide), safe-area-aware bottom padding (`viewport-fit=cover` from the shell's index), 16px input type so iOS never zooms the composer, `touch-action: manipulation`, `overscroll-behavior-y: none` on `body`, and `prefers-reduced-motion` disabling drawer transitions.
+- **Phone-first shell** — below 768px the frame becomes a single conversation column that fills the screen.
+- **Off-canvas drawers** — the sidebar drawer (`min(84vw, 340px)`) and the details drawer (up to 480px) slide in over the conversation and close with a tap on the scrim behind them.
+- **Bottom nav bar** — two 48px touch targets (菜单 / 详情) register into the shell's additive `shell.overlay` slot, so the bar is composable in and out and tears down with the plugin.
+- **Touch-first hygiene** — `100dvh` mounting (follows the URL bar and keyboard), safe-area-aware bottom padding, 16px inputs so iOS never zooms the composer, `touch-action: manipulation`, `overscroll-behavior-y: none`, and `prefers-reduced-motion` support.
+- **Zero shell changes** — the plugin reads the assembled DOM and never re-implements the frame; one cordis row composes it in or out.
+
+## Requirements
+
+- A running **DeepSeek Harness** Web shell — this is a DSH *client plugin*, not a standalone app.
+- Runtime peers: `@deepseek-ai/dsh-client-runtime`, `@deepseek-ai/dsh-client-ui-layout`, `@deepseek-ai/dsh-client-ui-slots`, `@deepseek-ai/dsh-client-ui-primitives`, `@deepseek-ai/dsh-client-ui-theme`, `@deepseek-ai/dsh-invariants`, `@deepseek-ai/cordis`, `react@^18`.
+
+> **Dependency note.** The `@deepseek-ai/dsh-client-*` peers live in a restricted npm scope and are
+> not published yet. Installing this package warns about the unmet peers; the plugin activates once
+> the peers are available (a future official release, a private registry, or installing the harness
+> checkout). Until then the plugin runs in this repo's own DSH environment.
+
+## Installation
+
+```sh
+# npm
+npm install dsh-ui-mobile
+
+# or through a DSH profile (npm registry)
+dsh plugin --profile <name> add dsh-ui-mobile
+
+# or directly from git (runs the self-contained prepare script)
+dsh plugin --profile <name> add github:jasondu/dsh-ui-mobile
+```
+
+Prerelease builds publish under the `next` dist-tag:
+
+```sh
+npm install dsh-ui-mobile@next
+```
+
+To register the plugin manually in the harness web bundle, add a row to its `cordis.patch.yml`:
+
+```yaml
+- id: dsh-ui-mobile
+  name: dsh-ui-mobile
+```
+
+## Usage
+
+On a phone (or a narrow browser window) the GUI reflows automatically — no configuration needed:
+
+- **菜单** (bottom-left) toggles the session sidebar drawer.
+- **详情** (bottom-right) toggles the per-session details drawer; the button appears only while a session is open.
+- An open drawer shows a dark scrim; tapping anywhere outside the drawer closes it.
+- The composer stays above the bottom bar, and the bar rides above the on-screen keyboard.
+
+Desktop and tablet widths keep the original three-column layout, drag handles, and sidebar auto-collapse behavior.
+
+## How it works
+
+The plugin never re-implements the frame — it reads the assembled DOM. The frame's column classes are
+CSS-module hashed and unreachable from another plugin, so `MobileFrameController` locates the AppFrame
+through its own `data-shell-overlay` child, stamps stable `data-mobile-role` attributes on the three
+grid columns, and mirrors the frame's `data-sidebar-collapsed` / `data-details-collapsed` flips plus the
+phone-tier `matchMedia` query into one reactive snapshot.
+
+The responsive sheet (`mobile.module.css`, side-effect import) restructures the frame with attribute
+selectors only: a `minmax(0, 1fr)` grid track with `!important` beats the frame's inline pixel
+template, the drawers leave grid flow as `position: fixed` layers, the drag handles hide, and the
+center column reserves the bottom strip the nav bar floats in so the composer stays clear of it.
+
+The nav bar registers into the frame's `shell.overlay` list slot (`id: 'mobile-nav'`) — additive,
+click-through by default, torn down with the plugin fiber. Its inject face binds the two buttons to
+`ctx.layout`'s panel actions (`toggleSidebar` / `openDetails` / `closeDetails`) and to the controller's
+subscribe/snapshot pair; a scrim behind an open drawer closes it on tap.
+
+## Development
+
+```sh
+pnpm install       # installs the standalone toolchain (tsdown, vitest, …)
+pnpm bundle        # emits lib/client.js (browser bundle) + the node half + declarations
+pnpm test          # vitest suites (30 tests, 100% source coverage)
+pnpm typecheck     # tsc over src/ and tests/
+```
+
+`pnpm bundle` is self-contained (tsdown transpiles `src/` directly — no tsc pass, no project
+references), so git installs run it through the `prepare` script. `pnpm test` and `pnpm typecheck`
+additionally need the `@deepseek-ai` peers resolvable, exactly like a runtime install.
+
+## Publishing
+
+The repo ships a GitHub Actions workflow (`.github/workflows/npm-publish.yml`). Push a version tag or
+trigger it from the Actions tab:
+
+```sh
+git tag v0.1.0-rc.6 && git push origin v0.1.0-rc.6
+```
+
+The dist-tag follows the version shape: a prerelease (contains `-`, e.g. `0.1.0-rc.6`) goes to `next`,
+a release (e.g. `0.1.0`) goes to `latest`. The workflow runs `pnpm install --frozen-lockfile` →
+`pnpm bundle` → `publint` → `npm publish`. Configure the `NPM_TOKEN` repository secret once
+(Settings → Secrets and variables → Actions) with an npm token that has publish rights for
+`dsh-ui-mobile`.
 
 ## Model Experience
 
@@ -38,9 +123,13 @@ None, as the plugin is browser-side presentation only; nothing here reaches a mo
 
 None; this package neither assembles nor sends a provider request.
 
-## Known Limitations and Deferred Work
+## Known Limitations and Roadmap
 
-- **Drawers are CSS-only, so drag resizing is unavailable on phones.** The frame's drag handles hide below 768px and the drawer widths are fixed (`min(84vw, 340px)` sidebar, up to 480px details); a phone-user resizing the panels is deferred.
+- **Drawers are CSS-only, so drag resizing is unavailable on phones.** The frame's drag handles hide below 768px and the drawer widths are fixed (`min(84vw, 340px)` sidebar, up to 480px details); resizable panels on phones are deferred.
 - **No swipe gestures yet.** Drawers open and close through the nav bar and the scrim tap only; swipe-to-open / swipe-to-dismiss is a follow-up.
-- **Hardcoded breakpoint.** The 768px phone tier and the 1024px shell auto-collapse are independent constants; a tablet-specific intermediate layout (e.g. rail + details overlay) is not covered.
-- **Bottom bar overlaps keyboard-driven flows by design.** When the on-screen keyboard is up, the nav bar rides above it via `100dvh`; the composer strip still reserves its own space.
+- **Hardcoded breakpoint.** The 768px phone tier and the shell's 1024px sidebar auto-collapse are independent constants; a tablet intermediate layout (e.g. rail + details overlay) is not covered.
+- **Bottom bar overlaps keyboard-driven flows by design.** With the on-screen keyboard up, the nav bar rides above it via `100dvh`; the composer strip still reserves its own space.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
