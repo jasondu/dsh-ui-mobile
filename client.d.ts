@@ -9,7 +9,7 @@
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 
 /** Required services: the layout panel actions and the slot registry. */
-export declare const inject: readonly ['layout', 'slots']
+export declare const inject: readonly ['layout', 'slots', 'sessions']
 
 /**
  * Client plugin body: start the frame controller, then register the nav bar

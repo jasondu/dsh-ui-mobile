@@ -1,0 +1,8 @@
+# Standalone bundle layer: this plugin owns the mobile PWA surface, so it
+# replaces the Web bundle's built-in ui-mobile entry before mounting itself.
+- id: ui-mobile
+  disabled: true
+
+- insert:
+    - id: dsh-ui-mobile
+      name: dsh-ui-mobile

@@ -138,7 +138,7 @@ describe('ui-mobile host half', () => {
   it('registers the /pwa/ and /sw.js routes and the index tap through the webserver', () => {
     const { ctx, taps, routes } = makeCtx()
     apply(ctx)
-    expect(routes.map(r => r.path)).toEqual(['/pwa', '/sw.js'])
+    expect(routes.map(r => r.path)).toEqual(['/pwa', '/sw.js', '/pwa/push/config', '/pwa/push/subscription'])
     expect(taps).toHaveLength(1)
   })
 

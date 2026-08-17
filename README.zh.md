@@ -79,6 +79,24 @@ npm install dsh-ui-mobile@next
 
 更倾向于把 manifest 静态内置进 shell？`docs/pwa-host.patch` 携带同样的 manifest/图标/meta 作为纯 `apps/web` 改动（在 deepseek-harness 检出中 `git apply --binary`）。
 
+### Agent 成功完成时的 Web Push
+
+插件可在 agent 成功结束（`turn/end` 的 `reason.kind: completed`）后向已安装 PWA 推送通知。启动 DSH 前设置以下服务端环境变量；私钥绝不可提交到仓库：
+
+```sh
+DSH_WEB_PUSH_VAPID_SUBJECT=mailto:ops@example.com
+DSH_WEB_PUSH_VAPID_PUBLIC_KEY=<base64url-public-key>
+DSH_WEB_PUSH_VAPID_PRIVATE_KEY=<base64url-private-key>
+# 可选：首次启动会把上方三个值写入该 0600 权限 JSON 文件；后续启动只设置此路径即可复用密钥对。
+DSH_WEB_PUSH_VAPID_PATH=/var/lib/dsh/vapid.json
+# 可选：订阅持久化位置（默认位于 DSH 工作目录下）
+DSH_WEB_PUSH_STORE_PATH=/var/lib/dsh/push-subscriptions.json
+```
+
+iOS 上的 `DSH_WEB_PUSH_VAPID_SUBJECT` 应使用真实 `https://` URL（例如 Tailscale HTTPS 地址）或有效联系邮箱；Apple Push 会拒绝 `.invalid` 等占位域名。
+
+在支持的 PWA 中点按**开启任务完成通知**并授予浏览器权限即可登记订阅。推送服务返回 404 或 410 时插件会自动移除失效订阅。iOS 需要已安装到主屏幕的应用且系统版本不低于 iOS 16.4。
+
 ## 工作原理
 
 插件从不重写框架，而是读取已装配的 DOM。框架的列类名经 CSS Modules 哈希，其他插件无法触及，

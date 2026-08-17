@@ -80,6 +80,25 @@ The plugin makes the Web GUI an **installable PWA by itself** — no shell chang
 
 Prefer a static in-shell manifest instead? `docs/pwa-host.patch` carries the same manifest/icons/meta as plain `apps/web` changes (`git apply --binary` in a deepseek-harness checkout).
 
+### Web Push on successful agent completion
+
+The plugin can notify installed PWAs after a successful agent turn (`turn/end` with `reason.kind: completed`). Set these server environment variables before starting DSH; never commit the private key:
+
+```sh
+DSH_WEB_PUSH_VAPID_SUBJECT=mailto:ops@example.com
+DSH_WEB_PUSH_VAPID_PUBLIC_KEY=<base64url-public-key>
+DSH_WEB_PUSH_VAPID_PRIVATE_KEY=<base64url-private-key>
+# Optional: persist the three values above in this mode-0600 JSON file. On a
+# later start, set this path alone and the plugin reads the same key pair.
+DSH_WEB_PUSH_VAPID_PATH=/var/lib/dsh/vapid.json
+# Optional durable subscription location (defaults below the DSH working directory)
+DSH_WEB_PUSH_STORE_PATH=/var/lib/dsh/push-subscriptions.json
+```
+
+For iOS, use a real `https://` URL (for example your Tailscale HTTPS URL) or a valid contact email as `DSH_WEB_PUSH_VAPID_SUBJECT`; placeholder domains such as `.invalid` are rejected by Apple Push.
+
+On a supported PWA, tap **开启任务完成通知** and grant the browser permission. The plugin registers the subscription and removes it automatically when its push service returns 404 or 410. iOS requires an installed Home Screen app and iOS 16.4 or later.
+
 ## How it works
 
 The plugin never re-implements the frame — it reads the assembled DOM. The frame's column classes are
