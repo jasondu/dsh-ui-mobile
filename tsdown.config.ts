@@ -1,6 +1,6 @@
 /**
- * Standalone tsdown config for the ui-mobile client plugin (extracted from the
- * DeepSeek Harness monorepo, where the shared preset `packages/client/tsdown.client.ts`
+ * Standalone tsdown config for the dsh-ui-mobile client plugin (extracted from
+ * the DeepSeek Harness monorepo, where the shared preset `packages/client/tsdown.client.ts`
  * provided this shape). Two artifacts:
  *
  * - lib/index.js + lib/invariant.js — the node half (host loader entry).
@@ -11,13 +11,16 @@
  *   lightningcss inside the bundle: importing `x.module.css` yields the
  *   hashed class map, and the css text auto-injects a `<style data-plugin>`
  *   tag at factory execution.
+ *
+ * The bundle id (`ID`) doubles as the plugin's module-table identity and the
+ * data-plugin stamp; keep it equal to the npm package name.
  */
 import { readFile } from 'node:fs/promises'
 import { basename, dirname, resolve as resolvePath } from 'node:path'
 import type { UserConfig } from 'tsdown'
 import { transform } from 'lightningcss'
 
-const ID = '@deepseek-ai/dsh-client-ui-mobile'
+const ID = 'dsh-ui-mobile'
 
 /** Virtual-id wrapper keeping module CSS away from tsdown's own css pipeline. */
 const CSS_VIRTUAL_PREFIX = '\0dsh-css:'

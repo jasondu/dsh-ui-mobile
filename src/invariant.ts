@@ -1,13 +1,13 @@
 /**
- * Package-owned invariant companion for `@deepseek-ai/dsh-client-ui-mobile`.
- * @module @deepseek-ai/dsh-client-ui-mobile/invariant
+ * Package-owned invariant companion for `dsh-ui-mobile`.
+ * @module dsh-ui-mobile/invariant
  */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = '@deepseek-ai/dsh-client-ui-mobile'
+const PACKAGE_NAME = 'dsh-ui-mobile'
 
 /** Cordis companion plugin name. */
 export const name = 'client-ui-mobile-invariant'

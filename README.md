@@ -1,19 +1,21 @@
-# @deepseek-ai/dsh-client-ui-mobile
+# dsh-ui-mobile
 
 English | [中文](README.zh.md)
 
 > **Standalone mirror.** This repository is the `ui-mobile` client plugin extracted from
 > [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)
-> (`packages/client/ui-mobile`). The source is authoritative; the in-repo copy lives there.
+> (`packages/client/ui-mobile`, published there as `@deepseek-ai/dsh-client-ui-mobile`).
+> The source is authoritative; the in-repo copy lives there.
 >
 > The plugin is a DSH **client plugin**: it ships no standalone app and only runs inside the
 > DeepSeek Harness Web shell. Runtime peers are the `@deepseek-ai/dsh-client-*` packages
 > (a restricted npm scope, currently unpublished), so `pnpm install` in this standalone repo
 > resolves only after those packages are available (installed from the harness repo, a private
 > registry, or a future official release). To use the plugin in a running GUI, register the row
-> in the web bundle's `cordis.patch.yml` (`- id: ui-mobile / name: '@deepseek-ai/dsh-client-ui-mobile'`).
+> in the web bundle's `cordis.patch.yml` (`- id: dsh-ui-mobile / name: 'dsh-ui-mobile'`).
 > `pnpm bundle` emits `lib/client.js` (browser bundle) plus the node half; `pnpm test` runs the
-> vitest suites (30 tests, 100% source coverage).
+> vitest suites (30 tests, 100% source coverage). Git installs run the self-contained
+> `prepare` script (`tsdown`) to build those entries from `src/`.
 
 Mobile plugin for the Web shell: below 768px the three-column AppFrame becomes a single conversation column with two off-canvas drawers — the sidebar slides in from the left and the details panel from the right — driven by a thumb-reachable bottom nav bar. Everything else (tablet widths, the shell's own 1024px sidebar auto-collapse, drag-resized panels) is untouched.
 

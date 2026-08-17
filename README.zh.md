@@ -1,17 +1,18 @@
-# @deepseek-ai/dsh-client-ui-mobile
+# dsh-ui-mobile
 
 [English](README.md) | 中文
 
 > **独立镜像。** 本仓库是从
 > [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)
-> （`packages/client/ui-mobile`）抽取出的 `ui-mobile` 客户端插件。源码以仓库内为准，此处为镜像副本。
+> （`packages/client/ui-mobile`，官方包名 `@deepseek-ai/dsh-client-ui-mobile`）抽取出的 `ui-mobile` 客户端插件。
+> 源码以仓库内为准，此处为镜像副本。
 >
 > 该插件是 DSH **客户端插件**：不提供独立应用，只能在 DeepSeek Harness Web Shell 内运行。运行时对等依赖是
 > `@deepseek-ai/dsh-client-*` 系列包（restricted scope，目前尚未发布），因此在独立仓库执行 `pnpm install`
 > 需要先获得这些包（从 harness 仓库安装、私有 registry，或等待官方发布）。要在运行中的 GUI 使用它，请在
-> web bundle 的 `cordis.patch.yml` 中注册该行（`- id: ui-mobile / name: '@deepseek-ai/dsh-client-ui-mobile'`）。
+> web bundle 的 `cordis.patch.yml` 中注册该行（`- id: dsh-ui-mobile / name: 'dsh-ui-mobile'`）。
 > `pnpm bundle` 产出 `lib/client.js`（浏览器 bundle）与 node 半区；`pnpm test` 运行 vitest 套件
-> （30 个测试，源码 100% 覆盖率）。
+> （30 个测试，源码 100% 覆盖率）。git 安装会运行自包含的 `prepare` 脚本（`tsdown`），从 `src/` 构建上述产物。
 
 Web Shell 的移动端插件：在 768px 以下，三栏 AppFrame 变为单栏会话视图，配有两个离屏抽屉——侧边栏从左滑入、详情面板从右滑入——由底部拇指可达的导航栏驱动。其余一切（平板宽度、Shell 自带的 1024px 侧边栏自动收起、拖拽调宽的面板）保持不变。
 
