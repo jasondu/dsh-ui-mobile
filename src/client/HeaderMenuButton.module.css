@@ -1,0 +1,37 @@
+/* Icon-only sidebar toggle for the session header's left strip. Touch-sized
+   but visually compact: the header row is 32px, so the button is 36px with a
+   16px icon. Phone-tier only — desktop keeps the sidebar's own collapse UI. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-left: 2px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.button:active {
+  background: var(--dsw-alias-button-ghost-active-fill);
+}
+
+.button[aria-pressed='true'] {
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-button-ghost-active-fill);
+}
+
+@media (min-width: 768px) {
+  .button {
+    display: none;
+  }
+}

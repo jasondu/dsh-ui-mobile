@@ -5,24 +5,27 @@
  * attributes on the assembled AppFrame (whose column classes are CSS-module
  * hashed and unreachable cross-plugin) and mirrors drawer + viewport state;
  * the mobile.module.css sheet (side-effect import) restructures the frame
- * into a single column with off-canvas drawers below 768px. Two registrations
- * contribute to the frame's `shell.overlay` list slot: the phone-tier nav bar
- * (panel actions over ctx.layout) and the PWA install banner (the install
- * controller's snapshot/subscription pair). A second effect owns the install
- * controller's window listeners.
+ * into a single column with off-canvas drawers below 768px. The phone-tier
+ * surface is split across three registrations: the sidebar toggle in the
+ * session header's left strip (`conversation.session.header.left`), the
+ * drawer scrim and the PWA install banner in the frame's `shell.overlay`
+ * list slot. A second effect owns the install controller's window listeners.
  */
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 // Type-only: pulls the layout plugin's Context merge (ctx.layout) and the
 // ui-layout SlotMap declaration (shell.overlay) into this compilation unit.
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
+import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { MobileFrameController } from './frame.ts'
 import { InstallController } from './install.ts'
 import { InstallBanner, type InstallBannerInjected } from './InstallBanner.tsx'
-import { MobileNav, type MobileNavInjected } from './MobileNav.tsx'
+import { HeaderMenuButton, type HeaderMenuButtonInjected } from './HeaderMenuButton.tsx'
+import { DrawerScrim, type DrawerScrimInjected } from './DrawerScrim.tsx'
 import { registerServiceWorker } from './sw.ts'
 import './mobile.module.css'
 
-export type { MobileNavInjected } from './MobileNav.tsx'
+export type { HeaderMenuButtonInjected } from './HeaderMenuButton.tsx'
+export type { DrawerScrimInjected } from './DrawerScrim.tsx'
 export type { MobileNavState } from './frame.ts'
 export type { InstallBannerInjected } from './InstallBanner.tsx'
 export type { InstallState } from './install.ts'
@@ -32,8 +35,8 @@ export const inject = ['layout', 'slots']
 
 /**
  * Client plugin body: register the app-shell service worker, start the frame
- * and install controllers, then register the nav bar and the install banner
- * into the shell overlay once the frame declares it.
+ * and install controllers, then register the header menu toggle, the drawer
+ * scrim, and the install banner once their slots are declared.
  * @param ctx - client root context.
  */
 export function apply(ctx: ClientContext): void {
@@ -49,22 +52,30 @@ export function apply(ctx: ClientContext): void {
     }
   }, 'ui-mobile: frame stabilization + install controller')
 
+  // Shared inject face for the two drawer-control surfaces (header toggle and
+  // the tap-outside scrim): the same frame snapshot + the sidebar toggle.
+  const drawerControls = () => ({
+    toggleSidebar: () => ctx.layout.toggleSidebar(),
+    subscribe: (listener: () => void) => controller.subscribe(listener),
+    snapshot: () => controller.snapshot(),
+  })
+
+  ctx.slots.inject('conversation.session.header.left', () => ctx.slots.register({
+    name: 'conversation.session.header.left',
+    id: 'mobile-menu',
+    order: -10,
+    label: '菜单',
+    inject: (): HeaderMenuButtonInjected => drawerControls(),
+  }, HeaderMenuButton))
+
   ctx.slots.inject('shell.overlay', () => {
-    const registerNav = ctx.slots.register({
+    const registerScrim = ctx.slots.register({
       name: 'shell.overlay',
-      id: 'mobile-nav',
-      order: 100,
-      label: '移动端导航',
-      inject: (): MobileNavInjected => ({
-        toggleSidebar: () => ctx.layout.toggleSidebar(),
-        toggleDetails: () => {
-          if (controller.snapshot().detailsOpen) ctx.layout.closeDetails()
-          else ctx.layout.openDetails()
-        },
-        subscribe: listener => controller.subscribe(listener),
-        snapshot: () => controller.snapshot(),
-      }),
-    }, MobileNav)
+      id: 'mobile-scrim',
+      order: 110,
+      label: '抽屉遮罩',
+      inject: (): DrawerScrimInjected => drawerControls(),
+    }, DrawerScrim)
     const registerBanner = ctx.slots.register({
       name: 'shell.overlay',
       id: 'mobile-install',
@@ -78,7 +89,7 @@ export function apply(ctx: ClientContext): void {
       }),
     }, InstallBanner)
     return () => {
-      registerNav()
+      registerScrim()
       registerBanner()
     }
   })

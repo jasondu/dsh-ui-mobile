@@ -1,11 +1,10 @@
-/* Floating install-promotion card, docked above the bottom nav bar. The bar
-   reserves the --dsh-mobile-nav-height strip at the column's bottom; the
-   banner floats just above it and is click-through only on its own box. */
+/* Floating install-promotion card, docked at the screen bottom (there is no
+   bottom nav bar anymore). Click-through only on its own box. */
 .banner {
   position: fixed;
   left: 12px;
   right: 12px;
-  bottom: calc(var(--dsh-mobile-nav-height) + 10px);
+  bottom: calc(env(safe-area-inset-bottom) + 10px);
   z-index: 28;
   display: flex;
   align-items: center;

@@ -33,11 +33,6 @@
      of grid flow entirely. */
   [data-mobile-frame] {
     grid-template-columns: minmax(0, 1fr) !important;
-    /* Single source of truth for the bottom nav bar's height: the bar's own
-       padding+button sum to this (MobileNav.module.css), and the center
-       column's reserved strip, the fixed composer seat, and the install
-       banner all dock off this variable so they can never drift apart. */
-    --dsh-mobile-nav-height: calc(48px + env(safe-area-inset-bottom));
   }
 
   /* Drag handles are pointer affordances; the nav bar's buttons replace them. */
@@ -88,8 +83,10 @@
   /* The center column reserves the bottom strip the nav bar floats in, so
      the composer (a flex child at the column's bottom edge) sits above it. */
   [data-mobile-role='center'] {
-    /* Reserved strip for the fixed bottom nav bar (--dsh-mobile-nav-height). */
-    padding-bottom: var(--dsh-mobile-nav-height);
+    /* The composer docks to the screen bottom; the transcript scroller
+       reserves the seat's own height via --dsh-composer-height, so no
+       extra strip is needed here. */
+    padding-bottom: 0;
   }
 
   /* ── composer stays put when the transcript overscrolls ──────────────────
@@ -123,9 +120,10 @@
     position: fixed !important;
     left: 0;
     right: 0;
-    /* Sits on the reserved nav-bar strip (--dsh-mobile-nav-height), the same
-       variable the center column's padding-bottom uses. */
-    bottom: var(--dsh-mobile-nav-height) !important;
+    /* Docks to the screen bottom: there is no bottom bar anymore, and the
+       transcript scroller reserves the seat's height via
+       --dsh-composer-height. */
+    bottom: 0 !important;
     /* Above the nav bar (z 30) so a 1px seam can never cover the seat's edge;
        still below the drawer scrim (z 35). */
     z-index: 31 !important;

@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
 /**
  * ui-mobile browser half: the apply() wiring — the frame + install controller
- * effect lifecycle and the two shell.overlay registrations' inject faces over
- * ctx.layout and the install controller.
+ * effect lifecycle and the three registrations' inject faces (header menu
+ * toggle over ctx.layout, drawer scrim, and the install banner).
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apply, inject } from '../src/client/index.ts'
+import { HeaderMenuButton, type HeaderMenuButtonInjected } from '../src/client/HeaderMenuButton.tsx'
+import { DrawerScrim, type DrawerScrimInjected } from '../src/client/DrawerScrim.tsx'
 import { InstallBanner, type InstallBannerInjected } from '../src/client/InstallBanner.tsx'
-import { MobileNav, type MobileNavInjected } from '../src/client/MobileNav.tsx'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 
 /** Build an AppFrame-shaped fixture; returns the frame element. */
@@ -24,7 +25,7 @@ function mountFrame(attributes: { sidebarCollapsed?: boolean; detailsCollapsed?:
 
 interface Registered {
   component: unknown
-  injectFactory: (() => MobileNavInjected) | (() => InstallBannerInjected)
+  injectFactory: () => unknown
 }
 
 /** Minimal client ctx: synchronous effect, eager slots injection, stubbed layout. */
@@ -45,7 +46,7 @@ function makeCtx() {
         if (typeof disposer === 'function') slotDisposers.push(disposer)
       },
       register(options: { inject?: () => unknown }, component: unknown): () => void {
-        registrations.push({ component, injectFactory: options.inject as () => MobileNavInjected })
+        registrations.push({ component, injectFactory: options.inject as () => unknown })
         return () => {}
       },
     },
@@ -68,19 +69,19 @@ describe('ui-mobile apply', () => {
     expect(inject).toEqual(['layout', 'slots'])
   })
 
-  it('registers the MobileNav and the InstallBanner into the shell overlay', () => {
+  it('registers the header menu button, drawer scrim, and install banner', () => {
     const frame = mountFrame()
     const { ctx, registrations } = makeCtx()
     apply(ctx)
-    expect(registrations.map(r => r.component)).toEqual([MobileNav, InstallBanner])
+    expect(registrations.map(r => r.component)).toEqual([HeaderMenuButton, DrawerScrim, InstallBanner])
     expect(frame.hasAttribute('data-mobile-frame')).toBe(true)
   })
 
-  it('binds the nav inject face to ctx.layout panel actions', () => {
+  it('binds the header menu toggle to ctx.layout.toggleSidebar', () => {
     mountFrame()
     const { ctx, layout, byComponent } = makeCtx()
     apply(ctx)
-    const face = byComponent<MobileNavInjected>(MobileNav)!
+    const face = byComponent<HeaderMenuButtonInjected>(HeaderMenuButton)!
     face.toggleSidebar()
     expect(layout.toggleSidebar).toHaveBeenCalledTimes(1)
     const unsubscribe = face.subscribe(() => {})
@@ -89,26 +90,14 @@ describe('ui-mobile apply', () => {
     expect(face.snapshot()).toEqual({ mobile: false, sidebarOpen: false, detailsOpen: false })
   })
 
-  it('opens the details drawer when it is closed', () => {
-    mountFrame({ detailsCollapsed: true }) // closed
+  it('binds the drawer scrim to the same sidebar toggle and snapshot', () => {
+    mountFrame({ sidebarCollapsed: false }) // sidebar open
     const { ctx, layout, byComponent } = makeCtx()
     apply(ctx)
-    const face = byComponent<MobileNavInjected>(MobileNav)!
-    expect(face.snapshot().detailsOpen).toBe(false)
-    face.toggleDetails()
-    expect(layout.openDetails).toHaveBeenCalledTimes(1)
-    expect(layout.closeDetails).not.toHaveBeenCalled()
-  })
-
-  it('closes the details drawer when it is open', () => {
-    mountFrame({ detailsCollapsed: false }) // open
-    const { ctx, layout, byComponent } = makeCtx()
-    apply(ctx)
-    const face = byComponent<MobileNavInjected>(MobileNav)!
-    expect(face.snapshot().detailsOpen).toBe(true)
-    face.toggleDetails()
-    expect(layout.closeDetails).toHaveBeenCalledTimes(1)
-    expect(layout.openDetails).not.toHaveBeenCalled()
+    const face = byComponent<DrawerScrimInjected>(DrawerScrim)!
+    expect(face.snapshot().sidebarOpen).toBe(true)
+    face.toggleSidebar()
+    expect(layout.toggleSidebar).toHaveBeenCalledTimes(1)
   })
 
   it('binds the install inject face to the install controller', async () => {
@@ -124,15 +113,14 @@ describe('ui-mobile apply', () => {
     unsubscribe()
   })
 
-  it('stops both controllers on effect teardown', () => {
+  it('stops both controllers and both slot contributions on teardown', () => {
     mountFrame()
     const { ctx, disposers, slotDisposers } = makeCtx()
     apply(ctx)
     expect(disposers).toHaveLength(1)
     expect(() => disposers[0]!()).not.toThrow()
-    // The slots.inject contribution returns a combined disposer that removes
-    // both registrations (HMR teardown path).
-    expect(slotDisposers).toHaveLength(1)
-    expect(() => slotDisposers[0]!()).not.toThrow()
+    // One slots.inject contribution per surface: header.left and shell.overlay.
+    expect(slotDisposers).toHaveLength(2)
+    for (const disposer of slotDisposers) expect(() => disposer()).not.toThrow()
   })
 })

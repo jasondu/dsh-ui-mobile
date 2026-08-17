@@ -1,0 +1,12 @@
+/* Tap-outside-to-close: covers everything below the drawer (z 40) and above
+   the fixed composer seat (z 31), within the frame's overlay layer (z 20). */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  border: none;
+  padding: 0;
+  background: rgb(0 0 0 / 0.45);
+  touch-action: none;
+  cursor: pointer;
+}

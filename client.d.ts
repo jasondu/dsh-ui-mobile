@@ -28,17 +28,21 @@ export interface MobileNavState {
   detailsOpen: boolean
 }
 
-/** The inject face the mobile plugin's registration hands the nav bar. */
-export interface MobileNavInjected {
+/** The inject face the drawer-control surfaces (header menu toggle and the tap-outside scrim) share. */
+export interface DrawerControlsInjected {
   /** Toggle the sidebar drawer (expand when collapsed, collapse when expanded). */
   toggleSidebar(): void
-  /** Toggle the details drawer (open when closed, close when open). */
-  toggleDetails(): void
   /** Subscribe to mobile-frame state changes; returns the unsubscriber. */
   subscribe(listener: () => void): () => void
   /** Latest mobile-frame state snapshot. */
   snapshot(): MobileNavState
 }
+
+/** The inject face the header menu toggle consumes (a DrawerControlsInjected). */
+export type HeaderMenuButtonInjected = DrawerControlsInjected
+
+/** The inject face the drawer scrim consumes (a DrawerControlsInjected). */
+export type DrawerScrimInjected = DrawerControlsInjected
 
 /** Reactive PWA install state (see per-field docs). */
 export interface InstallState {
