@@ -47,7 +47,9 @@
     bottom: 0;
     left: 0;
     z-index: 40;
-    width: min(84vw, 340px);
+    /* Compact phone drawer: session rows stay readable without leaving a
+       broad, unused gutter beside the sidebar's desktop-oriented content. */
+    width: min(78vw, 300px);
     transform: translateX(-102%);
     transition: transform 240ms var(--ds-ease-in-out, ease);
     box-shadow: 0 0 32px rgb(0 0 0 / 0.35);

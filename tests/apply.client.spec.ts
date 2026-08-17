@@ -7,6 +7,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apply, inject } from '../src/client/index.ts'
 import { HeaderMenuButton, type HeaderMenuButtonInjected } from '../src/client/HeaderMenuButton.tsx'
+import { NewSessionMenuButton, type NewSessionMenuButtonInjected } from '../src/client/NewSessionMenuButton.tsx'
 import { DrawerScrim, type DrawerScrimInjected } from '../src/client/DrawerScrim.tsx'
 import { InstallBanner, type InstallBannerInjected } from '../src/client/InstallBanner.tsx'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
@@ -69,11 +70,11 @@ describe('ui-mobile apply', () => {
     expect(inject).toEqual(['layout', 'slots'])
   })
 
-  it('registers the header menu button, drawer scrim, and install banner', () => {
+  it('registers menu buttons for sessions and new sessions, plus shell controls', () => {
     const frame = mountFrame()
     const { ctx, registrations } = makeCtx()
     apply(ctx)
-    expect(registrations.map(r => r.component)).toEqual([HeaderMenuButton, DrawerScrim, InstallBanner])
+    expect(registrations.map(r => r.component)).toEqual([HeaderMenuButton, DrawerScrim, NewSessionMenuButton, InstallBanner])
     expect(frame.hasAttribute('data-mobile-frame')).toBe(true)
   })
 
@@ -88,6 +89,15 @@ describe('ui-mobile apply', () => {
     unsubscribe()
     // jsdom has no matchMedia and the fixture is fully collapsed.
     expect(face.snapshot()).toEqual({ mobile: false, sidebarOpen: false, detailsOpen: false })
+  })
+
+  it('binds the new-session menu toggle to ctx.layout.toggleSidebar', () => {
+    mountFrame()
+    const { ctx, layout, byComponent } = makeCtx()
+    apply(ctx)
+    const face = byComponent<NewSessionMenuButtonInjected>(NewSessionMenuButton)!
+    face.toggleSidebar()
+    expect(layout.toggleSidebar).toHaveBeenCalledTimes(1)
   })
 
   it('binds the drawer scrim to the same sidebar toggle and snapshot', () => {
@@ -108,7 +118,7 @@ describe('ui-mobile apply', () => {
     // jsdom: no matchMedia, no iOS UA, no prompt — the banner is inert.
     expect(face.snapshot()).toEqual({ mobile: false, installable: false, iosHintVisible: false })
     await face.install() // no-op without a pending prompt
-    face.dismissIosHint() // persists the dismissal even when already hidden
+    face.dismissInstallPromotion() // persists the dismissal even when already hidden
     const unsubscribe = face.subscribe(() => {})
     unsubscribe()
   })
@@ -117,8 +127,8 @@ describe('ui-mobile apply', () => {
     mountFrame()
     const { ctx, disposers, slotDisposers } = makeCtx()
     apply(ctx)
-    // One effect for the controllers, one for the command-panel keyboard guard.
-    expect(disposers).toHaveLength(2)
+    // Controllers, command-panel keyboard guard, and keyboard send action.
+    expect(disposers).toHaveLength(3)
     for (const disposer of disposers) expect(() => disposer()).not.toThrow()
     // One slots.inject contribution per surface: header.left and shell.overlay.
     expect(slotDisposers).toHaveLength(2)

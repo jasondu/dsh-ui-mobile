@@ -127,7 +127,7 @@ describe('InstallController', () => {
     controller.stop()
   })
 
-  it('respects a previously dismissed iOS hint (localStorage)', () => {
+  it('respects a previously dismissed iOS hint (localStorage compatibility)', () => {
     localStorage.setItem('dsh-ui-mobile:ios-install-hint', '1')
     vi.stubGlobal('navigator', { ...navigator, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15' })
     const media = new MediaStub()
@@ -137,7 +137,7 @@ describe('InstallController', () => {
     controller.stop()
   })
 
-  it('dismissIosHint persists and flips the snapshot', () => {
+  it('dismissInstallPromotion persists and flips the snapshot', () => {
     vi.stubGlobal('navigator', { ...navigator, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15' })
     const media = new MediaStub()
     media.matches = true
@@ -145,12 +145,23 @@ describe('InstallController', () => {
     const listener = vi.fn()
     controller.subscribe(listener)
     expect(controller.snapshot().iosHintVisible).toBe(true)
-    controller.dismissIosHint()
+    controller.dismissInstallPromotion()
     expect(controller.snapshot().iosHintVisible).toBe(false)
-    expect(localStorage.getItem('dsh-ui-mobile:ios-install-hint')).toBe('1')
+    expect(localStorage.getItem('dsh-ui-mobile:install-promotion-dismissed')).toBe('1')
     expect(listener).toHaveBeenCalledTimes(1)
-    controller.dismissIosHint() // already hidden → no notification
+    controller.dismissInstallPromotion() // already hidden → no notification
     expect(listener).toHaveBeenCalledTimes(1)
+    controller.stop()
+  })
+
+  it('does not re-show a browser install prompt after dismissal', () => {
+    localStorage.setItem('dsh-ui-mobile:install-promotion-dismissed', '1')
+    const media = new MediaStub()
+    media.matches = true
+    const controller = new InstallController(media)
+    controller.start()
+    window.dispatchEvent(Object.assign(new Event('beforeinstallprompt'), { prompt: vi.fn(async () => {}) }))
+    expect(controller.snapshot().installable).toBe(false)
     controller.stop()
   })
 

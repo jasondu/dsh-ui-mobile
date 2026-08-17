@@ -15,6 +15,7 @@ const MOBILE_CSS = readFileSync(fileURLToPath(new URL('../src/client/mobile.modu
 const SCRIM_CSS = readFileSync(fileURLToPath(new URL('../src/client/DrawerScrim.module.css', import.meta.url)), 'utf8')
 const BANNER_CSS = readFileSync(fileURLToPath(new URL('../src/client/InstallBanner.module.css', import.meta.url)), 'utf8')
 const MENU_CSS = readFileSync(fileURLToPath(new URL('../src/client/HeaderMenuButton.module.css', import.meta.url)), 'utf8')
+const NEW_SESSION_MENU_CSS = readFileSync(fileURLToPath(new URL('../src/client/NewSessionMenuButton.module.css', import.meta.url)), 'utf8')
 
 /** Everything between the phone-tier media query opener and the end of the file. */
 const phoneTier = MOBILE_CSS.slice(MOBILE_CSS.indexOf('@media (max-width: 767px)'))
@@ -44,16 +45,26 @@ describe('mobile.module.css overscroll contract', () => {
     expect(phoneTier).toContain('padding-bottom: var(--dsh-composer-height, 152px)')
   })
 
-  it('stacks the scrim (35) above the seat (31); the install banner docks at the bottom', () => {
+  it('stacks the scrim (35) above the seat (31); the install banner sits at top right', () => {
     expect(phoneTier).toContain('z-index: 31 !important')
     expect(SCRIM_CSS).toContain('z-index: 35') // the drawer scrim
-    expect(BANNER_CSS).toContain('z-index: 28') // the PWA install banner
-    expect(BANNER_CSS).toContain('bottom: calc(env(safe-area-inset-bottom) + 10px)')
+    expect(BANNER_CSS).toContain('z-index: 2147483647') // above the composer
+    expect(BANNER_CSS).toContain('top: calc(env(safe-area-inset-top) + 12px)')
+    expect(BANNER_CSS).toContain('right: 12px')
   })
 
   it('keeps the header menu toggle icon-only and phone-tier-only', () => {
     expect(MENU_CSS).toContain('@media (min-width: 768px)')
     expect(MENU_CSS).toContain('display: none')
+  })
+
+  it('keeps the new-session menu below the opened sidebar drawer', () => {
+    expect(NEW_SESSION_MENU_CSS).toContain('z-index: 39')
+    expect(phoneTier).toContain('z-index: 40')
+  })
+
+  it('uses a compact sidebar drawer width on phones', () => {
+    expect(phoneTier).toContain('width: min(78vw, 300px)')
   })
 
   it('hides session-log download and places access mode at the phone toolbar edge', () => {

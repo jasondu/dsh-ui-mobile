@@ -22,14 +22,17 @@ import { EdgeSwipeController } from './edge-swipe.ts'
 import { InstallController } from './install.ts'
 import { InstallBanner, type InstallBannerInjected } from './InstallBanner.tsx'
 import { HeaderMenuButton, type HeaderMenuButtonInjected } from './HeaderMenuButton.tsx'
+import { NewSessionMenuButton, type NewSessionMenuButtonInjected } from './NewSessionMenuButton.tsx'
 import { DrawerScrim, type DrawerScrimInjected } from './DrawerScrim.tsx'
 import { registerServiceWorker } from './sw.ts'
 import { suppressCommandPanelScriptFocus } from './command-focus.ts'
+import { enableMobileEnterSend } from './mobile-enter-send.ts'
 import { PushController } from './push.ts'
 import { PushPrompt, type PushPromptInjected } from './PushPrompt.tsx'
 import './mobile.module.css'
 
 export type { HeaderMenuButtonInjected } from './HeaderMenuButton.tsx'
+export type { NewSessionMenuButtonInjected } from './NewSessionMenuButton.tsx'
 export type { DrawerScrimInjected } from './DrawerScrim.tsx'
 export type { MobileNavState } from './frame.ts'
 export type { InstallBannerInjected } from './InstallBanner.tsx'
@@ -67,6 +70,7 @@ export function apply(ctx: ClientContext): void {
   // Command-panel keyboard guard: phone tier only, so it never disturbs the
   // desktop combobox behavior; see command-focus.ts.
   ctx.effect(() => suppressCommandPanelScriptFocus(), 'ui-mobile: command panel keyboard guard')
+  ctx.effect(() => enableMobileEnterSend(), 'ui-mobile: keyboard send action')
 
   // Shared inject face for the two drawer-control surfaces (header toggle and
   // the tap-outside scrim): the same frame snapshot + the sidebar toggle.
@@ -92,6 +96,10 @@ export function apply(ctx: ClientContext): void {
       label: '抽屉遮罩',
       inject: (): DrawerScrimInjected => drawerControls(),
     }, DrawerScrim)
+    const registerNewSessionMenu = ctx.slots.register({
+      name: 'shell.overlay', id: 'mobile-new-session-menu', order: 89, label: '新会话菜单',
+      inject: (): NewSessionMenuButtonInjected => drawerControls(),
+    }, NewSessionMenuButton)
     const registerBanner = ctx.slots.register({
       name: 'shell.overlay',
       id: 'mobile-install',
@@ -101,7 +109,7 @@ export function apply(ctx: ClientContext): void {
         snapshot: () => install.snapshot(),
         subscribe: listener => install.subscribe(listener),
         install: () => install.install(),
-        dismissIosHint: () => install.dismissIosHint(),
+        dismissInstallPromotion: () => install.dismissInstallPromotion(),
       }),
     }, InstallBanner)
     const registerPushPrompt = ctx.slots.register({
@@ -110,6 +118,7 @@ export function apply(ctx: ClientContext): void {
     }, PushPrompt)
     return () => {
       registerScrim()
+      registerNewSessionMenu()
       registerBanner()
       registerPushPrompt()
     }

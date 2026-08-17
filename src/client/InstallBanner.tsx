@@ -7,6 +7,7 @@
  * (snapshot/subscribe + the two actions).
  */
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   IconCloseOutline16,
   IconDownloadOutline16,
@@ -24,8 +25,8 @@ export interface InstallBannerInjected {
   subscribe(listener: () => void): () => void
   /** Run the browser's install UI (no-op without a pending prompt). */
   install(): Promise<void>
-  /** Permanently dismiss the iOS add-to-home-screen hint. */
-  dismissIosHint(): void
+  /** Permanently dismiss the add-to-home-screen promotion. */
+  dismissInstallPromotion(): void
 }
 
 /** Full composed props: the shell.overlay runtime share + the inject face. */
@@ -36,36 +37,39 @@ export type InstallBannerProps = PropsRuntime<'shell.overlay'> & InstallBannerIn
  * @param props - the inject face.
  * @returns the banner element tree; null on desktop or when nothing is pending.
  */
-export function InstallBanner({ snapshot, subscribe, install, dismissIosHint }: InstallBannerProps) {
+export function InstallBanner({ snapshot, subscribe, install, dismissInstallPromotion }: InstallBannerProps) {
   const [state, setState] = useState<InstallState>(() => snapshot())
   useEffect(() => subscribe(() => setState(snapshot())), [subscribe, snapshot])
-  if (!state.mobile) return null
+  if (!state.mobile || typeof document === 'undefined') return null
   if (state.installable) {
-    return (
+    return createPortal(
       <div className={css.banner} role="region" aria-label="安装应用">
         <IconDownloadOutline16 />
         <div className={css.copy}>
           <strong>安装到主屏幕</strong>
-          <span>全屏使用，无地址栏</span>
+          <span>安装后可开启任务完成通知</span>
         </div>
         <button type="button" className={css.action} onClick={() => { void install() }}>
           安装
         </button>
-      </div>
+        <button type="button" className={css.iconButton} aria-label="关闭提示" onClick={dismissInstallPromotion}>
+          <IconCloseOutline16 />
+        </button>
+      </div>, document.body,
     )
   }
   if (state.iosHintVisible) {
-    return (
+    return createPortal(
       <div className={css.banner} role="region" aria-label="添加到主屏幕">
         <IconDownloadOutline16 />
         <div className={css.copy}>
           <strong>添加到主屏幕</strong>
-          <span>点分享按钮 → 添加到主屏幕，全屏使用</span>
+          <span>点分享按钮 → 添加后可开启任务完成通知</span>
         </div>
-        <button type="button" className={css.iconButton} aria-label="关闭提示" onClick={dismissIosHint}>
+        <button type="button" className={css.iconButton} aria-label="关闭提示" onClick={dismissInstallPromotion}>
           <IconCloseOutline16 />
         </button>
-      </div>
+      </div>, document.body,
     )
   }
   return null

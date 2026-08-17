@@ -11,8 +11,11 @@
 /** Phone-tier media query, shared with the frame controller. */
 const MOBILE_QUERY = '(max-width: 767px)'
 
-/** localStorage key remembering that the iOS hint was already shown. */
+/** Legacy localStorage key used by previous iOS-only install guidance. */
 const IOS_HINT_KEY = 'dsh-ui-mobile:ios-install-hint'
+
+/** localStorage key remembering that the user dismissed install promotion. */
+const INSTALL_PROMOTION_DISMISSED_KEY = 'dsh-ui-mobile:install-promotion-dismissed'
 
 /** The prompt object Chrome/Edge hands to `beforeinstallprompt` listeners. */
 export interface InstallPromptLike {
@@ -75,6 +78,7 @@ export class InstallController {
   private readonly media: MediaListLike
   private readonly onMedia = (): void => { this.setState({ mobile: this.media.matches }) }
   private readonly onPrompt = (event: Event): void => {
+    if (this.isPromotionDismissed()) return
     this.promptEvent = event as unknown as InstallPromptLike
     this.setState({ installable: true })
   }
@@ -91,7 +95,7 @@ export class InstallController {
     this.state = {
       mobile: media.matches,
       installable: false,
-      iosHintVisible: !isStandalone() && isIOSBrowser() && localStorage.getItem(IOS_HINT_KEY) !== '1',
+      iosHintVisible: !isStandalone() && isIOSBrowser() && !this.isPromotionDismissed(),
     }
   }
 
@@ -133,10 +137,17 @@ export class InstallController {
     this.setState({ installable: false })
   }
 
-  /** Permanently dismiss the iOS hint (localStorage-backed). */
-  dismissIosHint(): void {
-    localStorage.setItem(IOS_HINT_KEY, '1')
-    this.setState({ iosHintVisible: false })
+  /** Permanently dismiss install promotion in this browser (localStorage-backed). */
+  dismissInstallPromotion(): void {
+    localStorage.setItem(INSTALL_PROMOTION_DISMISSED_KEY, '1')
+    this.promptEvent = null
+    this.setState({ installable: false, iosHintVisible: false })
+  }
+
+  /** Honor the former iOS-only key so existing dismissals stay dismissed. */
+  private isPromotionDismissed(): boolean {
+    return localStorage.getItem(INSTALL_PROMOTION_DISMISSED_KEY) === '1'
+      || localStorage.getItem(IOS_HINT_KEY) === '1'
   }
 
   /** Publish a new snapshot only when something changed. */
