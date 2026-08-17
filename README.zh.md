@@ -15,6 +15,7 @@
 - **离屏抽屉**——侧边栏抽屉（`min(84vw, 340px)`）与详情抽屉（最大 480px）滑入会话之上，点按背后的遮罩即可关闭。
 - **底部导航栏**——两个 48px 触控目标（菜单 / 详情）注册进 Shell 的增量式 `shell.overlay` 槽，可组合进出、随插件卸载。
 - **触屏优先细节**——`100dvh` 挂载（跟随地址栏与键盘显隐）、安全区感知的底部内边距、16px 输入字号（避免 iOS 对输入区自动缩放）、`touch-action: manipulation`、`overscroll-behavior-y: none`、`prefers-reduced-motion` 支持。
+- **PWA 安装引导**——Chrome/Edge Android 在浏览器可安装时显示安装入口；iOS Safari 显示一次"添加到主屏幕"提示。从主屏幕启动时无浏览器外壳（见下文）。
 - **零 Shell 改动**——插件只读取已装配的 DOM，从不重写框架；一行 cordis 配置即可组合进/出。
 
 ## 环境要求
@@ -62,6 +63,14 @@ npm install dsh-ui-mobile@next
 - 输入区始终位于底部导航栏之上，导航栏随屏幕键盘上移。
 
 桌面与平板宽度保持原有三栏布局、拖拽把手与侧边栏自动收起行为不变。
+
+## 安装到主屏幕（PWA）
+
+Web GUI 是可安装的 PWA（宿主页面提供 web manifest 与图标；本插件负责应用内引导）。在移动浏览器中：
+
+- **Chrome / Edge Android**——浏览器可安装时（`beforeinstallprompt` 挂起），插件显示安装入口，点按后调用浏览器安装流程。
+- **iOS Safari**——没有安装 API，插件显示一次性提示：*分享 → 添加到主屏幕*。
+- **standalone 启动**——从主屏幕启动 GUI 使用 manifest 的 fullscreen 显示模式，浏览器外壳（含地址栏）完全消失。浏览器内直接访问仍保留地址栏——这是平台行为，不是缺陷。
 
 ## 工作原理
 

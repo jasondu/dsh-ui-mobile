@@ -3,7 +3,8 @@
  * lib/client.js). Hand-written so the standalone package stays self-contained:
  * the monorepo version generates these from tsc, but here the @deepseek-ai
  * peers may be unavailable at build time. Keep in sync with
- * `src/client/index.ts` and `src/client/frame.ts` when the public face moves.
+ * `src/client/index.ts`, `src/client/frame.ts`, and `src/client/install.ts`
+ * when the public face moves.
  */
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 
@@ -37,4 +38,26 @@ export interface MobileNavInjected {
   subscribe(listener: () => void): () => void
   /** Latest mobile-frame state snapshot. */
   snapshot(): MobileNavState
+}
+
+/** Reactive PWA install state (see per-field docs). */
+export interface InstallState {
+  /** True at phone tier. */
+  mobile: boolean
+  /** True while the browser offers install (Chrome/Edge Android, `beforeinstallprompt` pending). */
+  installable: boolean
+  /** True on iOS Safari outside standalone mode when the hint has not been dismissed yet. */
+  iosHintVisible: boolean
+}
+
+/** The inject face the mobile plugin's registration hands the install banner. */
+export interface InstallBannerInjected {
+  /** Latest install state snapshot. */
+  snapshot(): InstallState
+  /** Subscribe to install-state changes; returns the unsubscriber. */
+  subscribe(listener: () => void): () => void
+  /** Run the browser's install UI (no-op without a pending prompt). */
+  install(): Promise<void>
+  /** Permanently dismiss the iOS add-to-home-screen hint. */
+  dismissIosHint(): void
 }

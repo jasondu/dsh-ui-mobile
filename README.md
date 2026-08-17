@@ -15,6 +15,7 @@ Below **768px** the Web GUI's three-column layout becomes a single conversation 
 - **Off-canvas drawers** — the sidebar drawer (`min(84vw, 340px)`) and the details drawer (up to 480px) slide in over the conversation and close with a tap on the scrim behind them.
 - **Bottom nav bar** — two 48px touch targets (菜单 / 详情) register into the shell's additive `shell.overlay` slot, so the bar is composable in and out and tears down with the plugin.
 - **Touch-first hygiene** — `100dvh` mounting (follows the URL bar and keyboard), safe-area-aware bottom padding, 16px inputs so iOS never zooms the composer, `touch-action: manipulation`, `overscroll-behavior-y: none`, and `prefers-reduced-motion` support.
+- **PWA install promotion** — on Chrome/Edge Android an install CTA appears while the browser offers installation; on iOS Safari a one-time "add to home screen" hint shows. Home-screen launches run without browser chrome (see below).
 - **Zero shell changes** — the plugin reads the assembled DOM and never re-implements the frame; one cordis row composes it in or out.
 
 ## Requirements
@@ -63,6 +64,14 @@ On a phone (or a narrow browser window) the GUI reflows automatically — no con
 - The composer stays above the bottom bar, and the bar rides above the on-screen keyboard.
 
 Desktop and tablet widths keep the original three-column layout, drag handles, and sidebar auto-collapse behavior.
+
+## Install to home screen (PWA)
+
+The Web GUI is an installable PWA (the host page ships the web manifest and icons; this plugin adds the in-app promotion). In a mobile browser:
+
+- **Chrome / Edge Android** — the plugin shows an install CTA while the browser offers installation (`beforeinstallprompt` pending); tapping it runs the browser's install flow.
+- **iOS Safari** — there is no install API, so the plugin shows a one-time hint: *Share → Add to Home Screen*.
+- **Standalone launch** — starting the GUI from the home screen uses the manifest's fullscreen display mode, so the browser chrome — including the URL bar — is gone. In-browser visits keep the URL bar; that is the platform's behavior, not a defect.
 
 ## How it works
 
