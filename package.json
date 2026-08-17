@@ -1,7 +1,7 @@
 {
   "name": "dsh-ui-mobile",
   "description": "Mobile plugin for the DeepSeek Harness Web shell: off-canvas sidebar/details drawers, bottom nav bar, and touch-first responsive sheet",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publishConfig": {
     "access": "public"
   },
