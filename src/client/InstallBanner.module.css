@@ -1,11 +1,11 @@
-/* Floating install-promotion card, docked at the screen bottom (there is no
-   bottom nav bar anymore). Click-through only on its own box. */
+/* The portal removes this one-time prompt from the shell's stacking context;
+   it is deliberately parked in the right-top safe area, away from composer. */
 .banner {
   position: fixed;
-  left: 12px;
+  top: calc(env(safe-area-inset-top) + 12px);
   right: 12px;
-  bottom: calc(env(safe-area-inset-bottom) + 10px);
-  z-index: 28;
+  width: min(360px, calc(100vw - 24px));
+  z-index: 2147483647;
   display: flex;
   align-items: center;
   gap: 10px;

@@ -15,7 +15,7 @@ function makeProps(overrides: Partial<InstallBannerProps> = {}): InstallBannerPr
     snapshot: () => defaultState,
     subscribe: () => () => {},
     install: vi.fn(async () => {}),
-    dismissIosHint: vi.fn(),
+    dismissInstallPromotion: vi.fn(),
     useSessions: ((selector: (s: { current?: string }) => unknown) =>
       selector({ current: 's1' })) as unknown as InstallBannerProps['useSessions'],
     useWorkspaces: ((selector: (s: unknown) => unknown) =>
@@ -49,12 +49,19 @@ describe('InstallBanner', () => {
     expect(install).toHaveBeenCalledTimes(1)
   })
 
+  it('dismisses the install CTA permanently through the shared promotion action', () => {
+    const dismissInstallPromotion = vi.fn()
+    render(<InstallBanner {...makeProps({ dismissInstallPromotion, snapshot: () => ({ ...defaultState, installable: true }) })} />)
+    fireEvent.click(screen.getByRole('button', { name: '关闭提示' }))
+    expect(dismissInstallPromotion).toHaveBeenCalledTimes(1)
+  })
+
   it('renders the iOS hint and dismisses it', () => {
-    const dismissIosHint = vi.fn()
-    render(<InstallBanner {...makeProps({ dismissIosHint, snapshot: () => ({ ...defaultState, iosHintVisible: true }) })} />)
+    const dismissInstallPromotion = vi.fn()
+    render(<InstallBanner {...makeProps({ dismissInstallPromotion, snapshot: () => ({ ...defaultState, iosHintVisible: true }) })} />)
     expect(screen.getByRole('region', { name: '添加到主屏幕' })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: '关闭提示' }))
-    expect(dismissIosHint).toHaveBeenCalledTimes(1)
+    expect(dismissInstallPromotion).toHaveBeenCalledTimes(1)
   })
 
   it('prefers the install CTA when both states are pending', () => {
@@ -82,11 +89,11 @@ describe('InstallBanner', () => {
       snapshot: () => defaultState,
       subscribe: () => () => {},
       install: vi.fn(async () => {}),
-      dismissIosHint: vi.fn(),
+      dismissInstallPromotion: vi.fn(),
     }
     expect(face.snapshot()).toEqual(defaultState)
     expect(typeof face.subscribe).toBe('function')
     expect(typeof face.install).toBe('function')
-    expect(typeof face.dismissIosHint).toBe('function')
+    expect(typeof face.dismissInstallPromotion).toBe('function')
   })
 })

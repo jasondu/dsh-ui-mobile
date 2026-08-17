@@ -12,7 +12,7 @@ Below **768px** the Web GUI's three-column layout becomes a single conversation 
 ## Features
 
 - **Phone-first shell** — below 768px the frame becomes a single conversation column that fills the screen.
-- **Off-canvas drawers** — the sidebar drawer (`min(84vw, 340px)`) and the details drawer (up to 480px) slide in over the conversation and close with a tap on the scrim behind them; swipe right from the left 24px edge to open a collapsed sidebar.
+- **Off-canvas drawers** — the compact sidebar drawer (`min(78vw, 300px)`) and the details drawer (up to 480px) slide in over the conversation and close with a tap on the scrim behind them; swipe right from the left 24px edge to open a collapsed sidebar.
 - **Header menu toggle** — an icon-only sidebar toggle registers into the session header's left-of-title strip (`conversation.session.header.left`, an additive list seat), so it composes in and out and tears down with the plugin; a tap-outside scrim closes the drawer.
 - **Touch-first hygiene** — `100dvh` mounting (follows the URL bar and keyboard), safe-area-aware bottom padding, 16px inputs so iOS never zooms the composer, `touch-action: manipulation`, `overscroll-behavior-y: none`, and `prefers-reduced-motion` support.
 - **Focused phone toolbar** — hides the Session log download utility and places the Access mode control at the far right of the composer toolbar below 768px.
@@ -158,7 +158,7 @@ None; this package neither assembles nor sends a provider request.
 
 ## Known Limitations and Roadmap
 
-- **Drawers are CSS-only, so drag resizing is unavailable on phones.** The frame's drag handles hide below 768px and the drawer widths are fixed (`min(84vw, 340px)` sidebar, up to 480px details); resizable panels on phones are deferred.
+- **Drawers are CSS-only, so drag resizing is unavailable on phones.** The frame's drag handles hide below 768px and the drawer widths are fixed (`min(78vw, 300px)` sidebar, up to 480px details); resizable panels on phones are deferred.
 - **Left-edge open only.** A swipe opens the collapsed sidebar, while dismissal remains the explicit scrim tap or header button action; swipe-to-dismiss is intentionally not implemented.
 - **Hardcoded breakpoint.** The 768px phone tier and the shell's 1024px sidebar auto-collapse are independent constants; a tablet intermediate layout (e.g. rail + details overlay) is not covered.
 - **No bottom bar anymore.** The composer docks directly to the screen bottom; the iOS keyboard-follow behavior for `position: fixed` bottom elements depends on the platform (a known iOS quirk — see the composer-anchoring note above).

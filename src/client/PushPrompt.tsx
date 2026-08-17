@@ -9,10 +9,12 @@ export interface PushPromptInjected { push: PushController }
 export function PushPrompt({ push }: PushPromptInjected) {
   const [state, setState] = useState<PushState>(() => push.snapshot())
   useEffect(() => push.subscribe(() => setState(push.snapshot())), [push])
-  if (state.subscribed || typeof document === 'undefined') return null
+  // iOS only permits Web Push from a Home Screen web app. Do not turn that
+  // platform constraint into persistent chrome for people who prefer using
+  // the site in Safari; the install guidance has its own, dismissible banner.
+  if (state.subscribed || !state.installed || typeof document === 'undefined') return null
   let content: JSX.Element
-  if (!state.installed) content = <output className={css.notice}>通知仅在“添加到主屏幕”后可启用</output>
-  else if (!state.available) content = <output className={css.notice}>当前 iOS Web App 不支持通知</output>
+  if (!state.available) content = <output className={css.notice}>当前 iOS Web App 不支持通知</output>
   else if (!state.enabled) content = <output className={css.notice}>通知服务正在连接，请稍候刷新</output>
   else if (state.permission === 'denied') content = <output className={css.notice}>通知已被系统关闭，请在设置中允许</output>
   else content = <button type="button" className={css.button} onClick={() => { void push.enable() }}>
