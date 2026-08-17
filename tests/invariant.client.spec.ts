@@ -14,8 +14,18 @@ describe('invariant companion', () => {
     await expect(ctx.plugin(MobileInvariant).await()).resolves.toBeDefined()
   })
 
-  it('node-half apply is a no-op host placeholder', () => {
-    apply()
-    expect(true).toBe(true) // reaching here without throw is the contract
+  it('node-half apply wires the webserver surface without throwing', () => {
+    const ctx = {
+      inject(services: string[], callback: (scope: unknown) => void): void {
+        if (services.includes('webServer')) callback({
+          effect(run: () => unknown): void { run() },
+          webServer: {
+            register: () => () => {},
+            tapIndex: () => () => {},
+          },
+        })
+      },
+    } as unknown as Context
+    expect(() => apply(ctx)).not.toThrow()
   })
 })

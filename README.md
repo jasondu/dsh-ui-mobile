@@ -67,11 +67,14 @@ Desktop and tablet widths keep the original three-column layout, drag handles, a
 
 ## Install to home screen (PWA)
 
-The Web GUI is an installable PWA (the host page ships the web manifest and icons; this plugin adds the in-app promotion). In a mobile browser:
+The plugin makes the Web GUI an **installable PWA by itself** — no shell change needed. Its node (host) half taps the served index.html to inject the web-manifest link and the iOS PWA meta tags, and serves the manifest JSON plus the packaged icons from `/pwa/` (the injection is server-side, so it is equivalent to shipping those tags statically). The browser half adds the in-app promotion:
 
 - **Chrome / Edge Android** — the plugin shows an install CTA while the browser offers installation (`beforeinstallprompt` pending); tapping it runs the browser's install flow.
 - **iOS Safari** — there is no install API, so the plugin shows a one-time hint: *Share → Add to Home Screen*.
 - **Standalone launch** — starting the GUI from the home screen uses the manifest's fullscreen display mode, so the browser chrome — including the URL bar — is gone. In-browser visits keep the URL bar; that is the platform's behavior, not a defect.
+- **Host-provided PWA tags are replaced** — if the host already declares a manifest or iOS meta, the plugin strips and supersedes them with its own, so behavior is consistent across deployments.
+
+Prefer a static in-shell manifest instead? `docs/pwa-host.patch` carries the same manifest/icons/meta as plain `apps/web` changes (`git apply --binary` in a deepseek-harness checkout).
 
 ## How it works
 

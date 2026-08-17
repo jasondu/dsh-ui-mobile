@@ -66,11 +66,14 @@ npm install dsh-ui-mobile@next
 
 ## 安装到主屏幕（PWA）
 
-Web GUI 是可安装的 PWA（宿主页面提供 web manifest 与图标；本插件负责应用内引导）。在移动浏览器中：
+插件**自带完整宿主能力，无需修改 shell**即可让 Web GUI 成为可安装 PWA。其 node（宿主）半区在服务 index.html 时注入 manifest 链接与 iOS PWA meta 标签，并从 `/pwa/` 路由提供 manifest JSON 与打包图标（服务端注入，与静态内置对浏览器完全等效）。浏览器半区负责应用内引导：
 
 - **Chrome / Edge Android**——浏览器可安装时（`beforeinstallprompt` 挂起），插件显示安装入口，点按后调用浏览器安装流程。
 - **iOS Safari**——没有安装 API，插件显示一次性提示：*分享 → 添加到主屏幕*。
 - **standalone 启动**——从主屏幕启动 GUI 使用 manifest 的 fullscreen 显示模式，浏览器外壳（含地址栏）完全消失。浏览器内直接访问仍保留地址栏——这是平台行为，不是缺陷。
+- **宿主已有的 PWA 标签会被替换**——若宿主已声明 manifest 或 iOS meta，插件会移除并以其自身版本取代，保证各部署行为一致。
+
+更倾向于把 manifest 静态内置进 shell？`docs/pwa-host.patch` 携带同样的 manifest/图标/meta 作为纯 `apps/web` 改动（在 deepseek-harness 检出中 `git apply --binary`）。
 
 ## 工作原理
 
