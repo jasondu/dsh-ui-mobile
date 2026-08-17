@@ -72,7 +72,10 @@ export class MobileFrameController {
   private readonly listeners = new Set<() => void>()
   private readonly media: MediaListLike
   private readonly onMedia = (): void => { this.setState({ mobile: this.media.matches }) }
-  private readonly onBody = (): void => { this.attach() }
+  private readonly onBody = (): void => {
+    this.attach()
+    this.stampPhoneControls()
+  }
   private readonly onFrame = (): void => { this.read() }
   private frame: HTMLElement | null = null
   private bodyObserver: MutationObserver | null = null
@@ -108,6 +111,7 @@ export class MobileFrameController {
     this.bodyObserver = new MutationObserver(this.onBody)
     this.bodyObserver.observe(document.body, { childList: true, subtree: true })
     this.attach()
+    this.stampPhoneControls()
   }
 
   /** Stop observing and drop listeners. */
@@ -149,6 +153,37 @@ export class MobileFrameController {
       attributeFilter: [...COLLAPSE_ATTRIBUTES],
     })
     this.read()
+  }
+
+  /**
+   * Mark the two low-frequency phone controls which older hosts do not expose
+   * with plugin-stable attributes. The names and nesting are public UI
+   * behavior: `Menu` wraps the access-mode button in a span, inside its modes
+   * group, tools group, and finally the composer toolbar. Marking this
+   * structure lets the responsive sheet reflow it without reaching hashed
+   * CSS-module classes. Newer hosts already expose the same attributes.
+   */
+  private stampPhoneControls(): void {
+    const sessionLog = [...document.querySelectorAll<HTMLButtonElement>('button[aria-busy]')]
+      .find(button => button.textContent?.trim() === 'Session log')
+    sessionLog?.setAttribute('data-session-log-download', '')
+
+    const accessMode = [...document.querySelectorAll<HTMLButtonElement>('button[aria-label]')]
+      .find(button => {
+        const label = button.getAttribute('aria-label') ?? ''
+        return label.startsWith('Access mode') || label.startsWith('访问模式')
+      })
+    if (accessMode === undefined) return
+    accessMode.setAttribute('data-input-access-mode', '')
+    const modes = accessMode.parentElement?.parentElement
+    const tools = modes?.parentElement
+    const toolbar = tools?.parentElement
+    const trailing = toolbar?.lastElementChild
+    if (modes === null || tools === null || toolbar === null || trailing === null || trailing === undefined || trailing === tools) return
+    modes.setAttribute('data-composer-modes', '')
+    tools.setAttribute('data-composer-tools', '')
+    toolbar.setAttribute('data-composer-toolbar', '')
+    trailing.setAttribute('data-composer-trailing', '')
   }
 
   /** Mirror the frame's collapse attributes into the snapshot. */

@@ -38,6 +38,28 @@ function mountFrame(attributes: { sidebarCollapsed?: boolean; detailsCollapsed?:
   return frame
 }
 
+/** Add the host's menu-wrapped access control and session-log header action. */
+function mountPhoneControls(frame: HTMLElement): { access: HTMLButtonElement; log: HTMLButtonElement; toolbar: HTMLElement; tools: HTMLElement; modes: HTMLElement; trailing: HTMLElement } {
+  const center = frame.children[1]!
+  const log = document.createElement('button')
+  log.setAttribute('aria-busy', 'false')
+  log.textContent = 'Session log'
+  const toolbar = document.createElement('div')
+  const tools = document.createElement('div')
+  const modes = document.createElement('div')
+  const menuRoot = document.createElement('span')
+  const access = document.createElement('button')
+  access.setAttribute('aria-label', 'Access mode, current: Ask')
+  menuRoot.append(access)
+  modes.append(menuRoot)
+  tools.append(modes)
+  const trailing = document.createElement('div')
+  trailing.append(document.createElement('button'))
+  toolbar.append(tools, trailing)
+  center.append(log, toolbar)
+  return { access, log, toolbar, tools, modes, trailing }
+}
+
 afterEach(() => {
   document.body.replaceChildren()
   vi.unstubAllGlobals()
@@ -74,6 +96,20 @@ describe('MobileFrameController', () => {
     expect(details!.getAttribute("data-mobile-role")).toBe("details")
     expect(COLUMN_ROLES).toEqual(['sidebar', 'center', 'details'])
     expect(controller.snapshot()).toEqual<MobileNavState>({ mobile: false, sidebarOpen: false, detailsOpen: false })
+    controller.stop()
+  })
+
+  it('stamps portable phone-control attributes for responsive toolbar rules', () => {
+    const frame = mountFrame()
+    const { access, log, toolbar, tools, modes, trailing } = mountPhoneControls(frame)
+    const controller = new MobileFrameController(new MediaStub())
+    controller.start()
+    expect(log.hasAttribute('data-session-log-download')).toBe(true)
+    expect(access.hasAttribute('data-input-access-mode')).toBe(true)
+    expect(toolbar.hasAttribute('data-composer-toolbar')).toBe(true)
+    expect(tools.hasAttribute('data-composer-tools')).toBe(true)
+    expect(modes.hasAttribute('data-composer-modes')).toBe(true)
+    expect(trailing.hasAttribute('data-composer-trailing')).toBe(true)
     controller.stop()
   })
 

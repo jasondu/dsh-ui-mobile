@@ -17,6 +17,7 @@ import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { MobileFrameController } from './frame.ts'
+import { EdgeSwipeController } from './edge-swipe.ts'
 import { InstallController } from './install.ts'
 import { InstallBanner, type InstallBannerInjected } from './InstallBanner.tsx'
 import { HeaderMenuButton, type HeaderMenuButtonInjected } from './HeaderMenuButton.tsx'
@@ -43,12 +44,15 @@ export const inject = ['layout', 'slots']
 export function apply(ctx: ClientContext): void {
   registerServiceWorker()
   const controller = new MobileFrameController()
+  const edgeSwipe = new EdgeSwipeController(controller, () => ctx.layout.toggleSidebar())
   const install = new InstallController()
   ctx.effect(() => {
     controller.start()
+    edgeSwipe.start()
     install.start()
     return () => {
       controller.stop()
+      edgeSwipe.stop()
       install.stop()
     }
   }, 'ui-mobile: frame stabilization + install controller')

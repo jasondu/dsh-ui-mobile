@@ -12,9 +12,10 @@ Below **768px** the Web GUI's three-column layout becomes a single conversation 
 ## Features
 
 - **Phone-first shell** — below 768px the frame becomes a single conversation column that fills the screen.
-- **Off-canvas drawers** — the sidebar drawer (`min(84vw, 340px)`) and the details drawer (up to 480px) slide in over the conversation and close with a tap on the scrim behind them.
+- **Off-canvas drawers** — the sidebar drawer (`min(84vw, 340px)`) and the details drawer (up to 480px) slide in over the conversation and close with a tap on the scrim behind them; swipe right from the left 24px edge to open a collapsed sidebar.
 - **Header menu toggle** — an icon-only sidebar toggle registers into the session header's left-of-title strip (`conversation.session.header.left`, an additive list seat), so it composes in and out and tears down with the plugin; a tap-outside scrim closes the drawer.
 - **Touch-first hygiene** — `100dvh` mounting (follows the URL bar and keyboard), safe-area-aware bottom padding, 16px inputs so iOS never zooms the composer, `touch-action: manipulation`, `overscroll-behavior-y: none`, and `prefers-reduced-motion` support.
+- **Focused phone toolbar** — hides the Session log download utility and places the Access mode control at the far right of the composer toolbar below 768px.
 - **Keyboard restraint on phones** — opening the command panel never pops the on-screen keyboard (the plugin blurs the panel's script-driven search focus). The companion phone-tier behavior — not auto-focusing the composer on button taps or session switch — lives in ui-conversation; use a host DSH carrying those fixes for the fullest effect.
 - **PWA install promotion** — on Chrome/Edge Android an install CTA appears while the browser offers installation; on iOS Safari a one-time "add to home screen" hint shows. Home-screen launches run without browser chrome (see below).
 - **Zero shell changes** — the plugin reads the assembled DOM and never re-implements the frame; one cordis row composes it in or out.
@@ -60,7 +61,9 @@ To register the plugin manually in the harness web bundle, add a row to its `cor
 On a phone (or a narrow browser window) the GUI reflows automatically — no configuration needed:
 
 - **菜单** (icon at the far left of the session header) toggles the sidebar drawer.
+- A rightward swipe beginning at the left screen edge also opens a collapsed sidebar; vertical drags and non-edge swipes remain normal page gestures.
 - An open drawer shows a dark scrim; tapping anywhere outside the drawer closes it.
+- The Session log download button is hidden and Access mode is at the far right of the phone composer toolbar.
 - The composer docks to the screen bottom (no bottom bar), riding above the on-screen keyboard via the platform's keyboard handling.
 
 Desktop and tablet widths keep the original three-column layout, drag handles, and sidebar auto-collapse behavior.
@@ -83,12 +86,14 @@ The plugin never re-implements the frame — it reads the assembled DOM. The fra
 CSS-module hashed and unreachable from another plugin, so `MobileFrameController` locates the AppFrame
 through its own `data-shell-overlay` child, stamps stable `data-mobile-role` attributes on the three
 grid columns, and mirrors the frame's `data-sidebar-collapsed` / `data-details-collapsed` flips plus the
-phone-tier `matchMedia` query into one reactive snapshot.
+phone-tier `matchMedia` query into one reactive snapshot. It also stamps portable attributes for the existing Session log and Access mode controls, so the compact phone-toolbar rules work with compatible hosts that do not yet expose those attributes themselves.
 
 The responsive sheet (`mobile.module.css`, side-effect import) restructures the frame with attribute
 selectors only: a `minmax(0, 1fr)` grid track with `!important` beats the frame's inline pixel
 template, the drawers leave grid flow as `position: fixed` layers, the drag handles hide, and the
 the composer docks to the screen bottom as a fixed element, and the scroller reserves its live height.
+
+`EdgeSwipeController` recognizes a one-shot rightward gesture beginning in the left 24px of a collapsed phone viewport; it uses a distance threshold rather than drag-following, so it does not add per-frame drawer layout work.
 
 The header menu toggle registers into the session header's left-of-title strip
 (`conversation.session.header.left`) and the drawer scrim into the frame's `shell.overlay` list slot —
@@ -135,7 +140,7 @@ None; this package neither assembles nor sends a provider request.
 ## Known Limitations and Roadmap
 
 - **Drawers are CSS-only, so drag resizing is unavailable on phones.** The frame's drag handles hide below 768px and the drawer widths are fixed (`min(84vw, 340px)` sidebar, up to 480px details); resizable panels on phones are deferred.
-- **No swipe gestures yet.** The drawer opens through the header menu toggle and closes through the scrim tap only; swipe-to-open / swipe-to-dismiss is a follow-up.
+- **Left-edge open only.** A swipe opens the collapsed sidebar, while dismissal remains the explicit scrim tap or header button action; swipe-to-dismiss is intentionally not implemented.
 - **Hardcoded breakpoint.** The 768px phone tier and the shell's 1024px sidebar auto-collapse are independent constants; a tablet intermediate layout (e.g. rail + details overlay) is not covered.
 - **No bottom bar anymore.** The composer docks directly to the screen bottom; the iOS keyboard-follow behavior for `position: fixed` bottom elements depends on the platform (a known iOS quirk — see the composer-anchoring note above).
 - **Composer anchoring is enforced against overscroll.** On phones the composer seat moves to `position: fixed` and the transcript scroller sets `overscroll-behavior-y: contain`, so pulling the chat list past its ends no longer drags the input bar along (iOS rubber-banding cannot be disabled, so the fixed seat — which the platform never displaces — is the mechanism there).

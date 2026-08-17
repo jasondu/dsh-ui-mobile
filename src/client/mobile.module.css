@@ -149,6 +149,31 @@
     touch-action: manipulation;
   }
 
+  /* The export capsule is desktop utility chrome. Phone sessions keep the
+     title row focused on navigation; the slash command remains available. */
+  [data-mobile-role='center'] [data-session-log-download] {
+    display: none;
+  }
+
+  /* Flatten only the composer toolbar's structural wrappers on phones. This
+     lets the access-mode trigger become the final flex item without changing
+     the desktop DOM or slot order; it remains after Send/Stop at the far
+     right, while the rest of the controls retain their source order. */
+  [data-composer-toolbar] {
+    gap: 8px;
+  }
+
+  [data-composer-tools],
+  [data-composer-modes],
+  [data-composer-trailing] {
+    display: contents;
+  }
+
+  [data-composer-toolbar] [data-input-access-mode] {
+    order: 1;
+    margin-left: auto;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     [data-mobile-role='sidebar'],
     [data-mobile-role='details'] {
