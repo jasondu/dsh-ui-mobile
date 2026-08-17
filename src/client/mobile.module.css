@@ -33,6 +33,11 @@
      of grid flow entirely. */
   [data-mobile-frame] {
     grid-template-columns: minmax(0, 1fr) !important;
+    /* Single source of truth for the bottom nav bar's height: the bar's own
+       padding+button sum to this (MobileNav.module.css), and the center
+       column's reserved strip, the fixed composer seat, and the install
+       banner all dock off this variable so they can never drift apart. */
+    --dsh-mobile-nav-height: calc(48px + env(safe-area-inset-bottom));
   }
 
   /* Drag handles are pointer affordances; the nav bar's buttons replace them. */
@@ -83,7 +88,8 @@
   /* The center column reserves the bottom strip the nav bar floats in, so
      the composer (a flex child at the column's bottom edge) sits above it. */
   [data-mobile-role='center'] {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    /* Reserved strip for the fixed bottom nav bar (--dsh-mobile-nav-height). */
+    padding-bottom: var(--dsh-mobile-nav-height);
   }
 
   /* ── composer stays put when the transcript overscrolls ──────────────────
@@ -117,9 +123,9 @@
     position: fixed !important;
     left: 0;
     right: 0;
-    /* Sits on the reserved nav-bar strip, same constant as .centerCol's
-       padding-bottom above. */
-    bottom: calc(64px + env(safe-area-inset-bottom)) !important;
+    /* Sits on the reserved nav-bar strip (--dsh-mobile-nav-height), the same
+       variable the center column's padding-bottom uses. */
+    bottom: var(--dsh-mobile-nav-height) !important;
     /* Above the nav bar (z 30) so a 1px seam can never cover the seat's edge;
        still below the drawer scrim (z 35). */
     z-index: 31 !important;

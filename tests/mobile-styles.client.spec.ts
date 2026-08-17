@@ -32,10 +32,22 @@ describe('mobile.module.css overscroll contract', () => {
     expect(phoneTier).toContain('position: fixed !important')
     expect(phoneTier).toContain('left: 0')
     expect(phoneTier).toContain('right: 0')
-    expect(phoneTier).toContain('bottom: calc(64px + env(safe-area-inset-bottom)) !important')
+    expect(phoneTier).toContain('bottom: var(--dsh-mobile-nav-height) !important')
     // The fix must not leak outside the phone tier (desktop keeps the
     // sticky composer from ui-conversation).
     expect(MOBILE_CSS.slice(0, MOBILE_CSS.indexOf('@media (max-width: 767px)'))).not.toContain('position: fixed')
+  })
+
+  it('defines the compact nav-bar height once and reuses it everywhere', () => {
+    // Single source of truth: the bar is 48px + safe-area, and the reserved
+    // center strip, the fixed composer seat, and the install banner all dock
+    // off the same variable so they cannot drift apart.
+    expect(phoneTier).toContain('--dsh-mobile-nav-height: calc(48px + env(safe-area-inset-bottom))')
+    expect(phoneTier).toContain('padding-bottom: var(--dsh-mobile-nav-height)')
+    expect(BANNER_CSS).toContain('bottom: calc(var(--dsh-mobile-nav-height) + 10px)')
+    // The bar's own padding+button sum matches the variable (4 + 40 + 4).
+    expect(NAV_CSS).toContain('min-height: 40px')
+    expect(NAV_CSS).toContain('padding: 4px 12px calc(4px + env(safe-area-inset-bottom))')
   })
 
   it('reserves the seat height so the last message is not hidden behind the input', () => {

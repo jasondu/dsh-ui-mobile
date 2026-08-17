@@ -7,7 +7,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  /* Compact bar: 4 + 40 + 4 = 48px + safe-area, matching
+     --dsh-mobile-nav-height (mobile.module.css) so the composer seat and
+     install banner dock exactly above it. */
+  padding: 4px 12px calc(4px + env(safe-area-inset-bottom));
   background: var(--dsw-alias-bg-base);
   border-top: 1px solid var(--dsw-alias-border-l1);
 }
@@ -24,7 +27,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 48px;
+  min-height: 40px;
   min-width: 48px;
   padding: 0 14px;
   border: none;
