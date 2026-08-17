@@ -9,10 +9,6 @@
 
 在 **768px** 以下，Web GUI 的三栏布局变为单栏会话视图，配有两个离屏抽屉——会话侧边栏从左滑入、详情面板从右滑入——由底部拇指可达的导航栏驱动。桌面与平板（768–1023px）布局保持不变。
 
-> **独立镜像。** 本仓库是 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)
-> 中 `packages/client/ui-mobile`（官方包名 `@deepseek-ai/dsh-client-ui-mobile`）的镜像副本。
-> 源码以仓库内为准；本仓库把同一插件作为可安装的 npm 包分发。
-
 ## 特性
 
 - **手机优先的 Shell**——768px 以下框架变为占满屏幕的单栏会话视图。

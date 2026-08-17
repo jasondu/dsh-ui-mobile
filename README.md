@@ -9,11 +9,6 @@ English | [中文](README.zh.md)
 
 Below **768px** the Web GUI's three-column layout becomes a single conversation column with two off-canvas drawers — the session sidebar slides in from the left, the details panel from the right — driven by a thumb-reachable bottom nav bar. Desktop and tablet (768–1023px) layouts are untouched.
 
-> **Standalone mirror.** This repository is a mirror of `packages/client/ui-mobile` from
-> [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) (published there as
-> `@deepseek-ai/dsh-client-ui-mobile`). The harness copy stays authoritative; this repo ships the
-> same plugin as an installable npm package.
-
 ## Features
 
 - **Phone-first shell** — below 768px the frame becomes a single conversation column that fills the screen.
