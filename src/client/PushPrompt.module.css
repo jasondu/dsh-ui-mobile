@@ -1,0 +1,31 @@
+.button {
+  position: fixed;
+  right: 12px;
+  top: calc(env(safe-area-inset-top) + 12px);
+  z-index: 2147483647;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--dsw-alias-border-primary);
+  border-radius: 10px;
+  background: #151517;
+  color: #FFFFFF;
+  font: inherit;
+  cursor: pointer;
+}
+
+.button:active { background: #000000; }
+
+.notice {
+  position: fixed;
+  right: 12px;
+  top: calc(env(safe-area-inset-top) + 12px);
+  z-index: 2147483647;
+  max-width: min(280px, calc(100vw - 32px));
+  padding: 9px 12px;
+  border: 1px solid #FFB020;
+  border-radius: 10px;
+  background: #151517;
+  color: #FFFFFF;
+  font: inherit;
+  line-height: 1.35;
+}

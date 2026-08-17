@@ -17,6 +17,8 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { fileURLToPath } from 'node:url'
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-host-webserver'
+import type { PushSubscription } from 'web-push'
+import { PushService } from './push.ts'
 
 /** Manifest served at /pwa/manifest.webmanifest (icons resolve to /pwa/icons/). */
 const MANIFEST = {
@@ -80,6 +82,29 @@ self.addEventListener('activate', (event) => {
     const keys = await caches.keys();
     await Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
     await self.clients.claim();
+  })());
+});
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  event.waitUntil(self.registration.showNotification(data.title || 'Agent 已完成', {
+    body: data.body || '任务已成功完成，点按查看会话。',
+    icon: '/pwa/icons/icon-192.png',
+    badge: '/pwa/icons/icon-192.png',
+    tag: data.sessionId || 'dsh-agent-complete',
+    data: { sessionId: data.sessionId },
+  }));
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const target = windows[0];
+    if (target) {
+      await target.focus();
+      target.postMessage({ type: 'dsh-push-open', sessionId: event.notification.data && event.notification.data.sessionId });
+      return;
+    }
+    await self.clients.openWindow('/');
   })());
 });
 self.addEventListener('fetch', (event) => {
@@ -213,11 +238,62 @@ async function servePwa(req: IncomingMessage, res: ServerResponse): Promise<void
   }
 }
 
+/** Parse a bounded JSON request body for the same-origin push endpoints. */
+async function jsonBody(req: IncomingMessage): Promise<unknown> {
+  const parts: Buffer[] = []
+  let size = 0
+  for await (const part of req) {
+    const chunk = Buffer.isBuffer(part) ? part : Buffer.from(part)
+    size += chunk.length
+    if (size > 16 * 1024) throw new Error('request body too large')
+    parts.push(chunk)
+  }
+  return JSON.parse(Buffer.concat(parts).toString('utf8'))
+}
+
+function sendJson(res: ServerResponse, status: number, body: unknown): void {
+  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+  res.end(JSON.stringify(body))
+}
+
+function pushConfigRoute(push: PushService) {
+  return (req: IncomingMessage, res: ServerResponse): void => {
+    if (req.method !== 'GET') { res.writeHead(405); res.end(); return }
+    sendJson(res, 200, push.config())
+  }
+}
+
+function pushSubscriptionRoute(push: PushService) {
+  return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
+    if (!push.enabled()) { sendJson(res, 503, { error: 'Web Push is not configured' }); return }
+    if (req.method === 'POST') {
+      const subscription = await jsonBody(req) as PushSubscription
+      if (typeof subscription.endpoint !== 'string' || subscription.keys === undefined) { sendJson(res, 400, { error: 'invalid subscription' }); return }
+      await push.subscribe(subscription)
+      sendJson(res, 201, { ok: true })
+      return
+    }
+    if (req.method === 'DELETE') {
+      const body = await jsonBody(req) as { endpoint?: unknown }
+      if (typeof body.endpoint !== 'string') { sendJson(res, 400, { error: 'invalid endpoint' }); return }
+      await push.unsubscribe(body.endpoint)
+      sendJson(res, 200, { ok: true })
+      return
+    }
+    res.writeHead(405); res.end()
+  }
+}
+
 /**
  * Register the PWA host surface when the webserver service is composed.
  * @param ctx - Host context that may acquire the webserver service.
  */
 export function apply(ctx: Context): void {
+  const push = new PushService()
+  const events = ctx as Context & { on?: (name: string, listener: (session: { id: unknown }, event: { type: string; data: { reason: { kind: string } } }) => void, options?: { global?: boolean }) => void }
+  events.on?.('session/event', (session, event) => {
+    if (event.type === 'turn/end' && event.data.reason.kind === 'completed') void push.notify(String(session.id))
+  }, { global: true })
   ctx.inject(['webServer'], (httpCtx) => {
     httpCtx.effect(
       () => httpCtx.webServer.register({ kind: 'prefix', path: '/pwa', handler: servePwa }),
@@ -226,6 +302,14 @@ export function apply(ctx: Context): void {
     httpCtx.effect(
       () => httpCtx.webServer.register({ kind: 'exact', path: '/sw.js', handler: serveSw }),
       'dsh-ui-mobile: service worker route',
+    )
+    httpCtx.effect(
+      () => httpCtx.webServer.register({ kind: 'exact', path: '/pwa/push/config', handler: pushConfigRoute(push) }),
+      'dsh-ui-mobile: web push config route',
+    )
+    httpCtx.effect(
+      () => httpCtx.webServer.register({ kind: 'exact', path: '/pwa/push/subscription', handler: pushSubscriptionRoute(push) }),
+      'dsh-ui-mobile: web push subscription route',
     )
     httpCtx.effect(
       () => httpCtx.webServer.tapIndex(html => injectBootSkeleton(injectPwaHead(stripHostPwa(html)))),

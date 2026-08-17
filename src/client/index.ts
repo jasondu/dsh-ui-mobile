@@ -16,6 +16,7 @@ import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 // ui-layout SlotMap declaration (shell.overlay) into this compilation unit.
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type {} from '@deepseek-ai/dsh-client-runtime/client'
 import { MobileFrameController } from './frame.ts'
 import { EdgeSwipeController } from './edge-swipe.ts'
 import { InstallController } from './install.ts'
@@ -24,6 +25,8 @@ import { HeaderMenuButton, type HeaderMenuButtonInjected } from './HeaderMenuBut
 import { DrawerScrim, type DrawerScrimInjected } from './DrawerScrim.tsx'
 import { registerServiceWorker } from './sw.ts'
 import { suppressCommandPanelScriptFocus } from './command-focus.ts'
+import { PushController } from './push.ts'
+import { PushPrompt, type PushPromptInjected } from './PushPrompt.tsx'
 import './mobile.module.css'
 
 export type { HeaderMenuButtonInjected } from './HeaderMenuButton.tsx'
@@ -31,9 +34,10 @@ export type { DrawerScrimInjected } from './DrawerScrim.tsx'
 export type { MobileNavState } from './frame.ts'
 export type { InstallBannerInjected } from './InstallBanner.tsx'
 export type { InstallState } from './install.ts'
+export type { PushPromptInjected } from './PushPrompt.tsx'
 
 /** Required services: the layout panel actions and the slot registry. */
-export const inject = ['layout', 'slots']
+export const inject = ['layout', 'slots', 'sessions']
 
 /**
  * Client plugin body: register the app-shell service worker, start the frame
@@ -46,14 +50,17 @@ export function apply(ctx: ClientContext): void {
   const controller = new MobileFrameController()
   const edgeSwipe = new EdgeSwipeController(controller, () => ctx.layout.toggleSidebar())
   const install = new InstallController()
+  const push = new PushController(sessionId => { ctx.sessions.open(sessionId as never) })
   ctx.effect(() => {
     controller.start()
     edgeSwipe.start()
     install.start()
+    void push.start()
     return () => {
       controller.stop()
       edgeSwipe.stop()
       install.stop()
+      push.stop()
     }
   }, 'ui-mobile: frame stabilization + install controller')
 
@@ -97,9 +104,14 @@ export function apply(ctx: ClientContext): void {
         dismissIosHint: () => install.dismissIosHint(),
       }),
     }, InstallBanner)
+    const registerPushPrompt = ctx.slots.register({
+      name: 'shell.overlay', id: 'mobile-push-prompt', order: 91, label: '开启完成通知',
+      inject: (): PushPromptInjected => ({ push }),
+    }, PushPrompt)
     return () => {
       registerScrim()
       registerBanner()
+      registerPushPrompt()
     }
   })
 }
