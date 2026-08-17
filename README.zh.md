@@ -11,7 +11,8 @@
 > `@deepseek-ai/dsh-client-*` 系列包（restricted scope，目前尚未发布），因此在独立仓库执行 `pnpm install`
 > 需要先获得这些包（从 harness 仓库安装、私有 registry，或等待官方发布）。要在运行中的 GUI 使用它，请在
 > web bundle 的 `cordis.patch.yml` 中注册该行（`- id: dsh-ui-mobile / name: 'dsh-ui-mobile'`）。
-> `pnpm bundle` 产出 `lib/client.js`（浏览器 bundle）与 node 半区；`pnpm test` 运行 vitest 套件
+> `pnpm bundle` 产出 `lib/client.js`（浏览器 bundle）、node 半区及其声明
+> （`lib/index.d.ts`、`lib/invariant.d.ts`，以及手写的 `client.d.ts`）；`pnpm test` 运行 vitest 套件
 > （30 个测试，源码 100% 覆盖率）。git 安装会运行自包含的 `prepare` 脚本（`tsdown`），从 `src/` 构建上述产物。
 
 Web Shell 的移动端插件：在 768px 以下，三栏 AppFrame 变为单栏会话视图，配有两个离屏抽屉——侧边栏从左滑入、详情面板从右滑入——由底部拇指可达的导航栏驱动。其余一切（平板宽度、Shell 自带的 1024px 侧边栏自动收起、拖拽调宽的面板）保持不变。

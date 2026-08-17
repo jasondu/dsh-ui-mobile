@@ -54,7 +54,10 @@ const nodeLibrary: UserConfig = {
   platform: 'node',
   target: 'es2024',
   fixedExtension: false,
-  dts: false,
+  // The node half ships its own declarations (lib/*.d.ts) so the standalone
+  // package needs no separate tsc pass; the client bundle below does not (its
+  // CJS closure-factory artifact would break dts output — see client.d.ts).
+  dts: {},
   clean: false,
 }
 
