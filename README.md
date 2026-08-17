@@ -136,6 +136,7 @@ None; this package neither assembles nor sends a provider request.
 - **No swipe gestures yet.** Drawers open and close through the nav bar and the scrim tap only; swipe-to-open / swipe-to-dismiss is a follow-up.
 - **Hardcoded breakpoint.** The 768px phone tier and the shell's 1024px sidebar auto-collapse are independent constants; a tablet intermediate layout (e.g. rail + details overlay) is not covered.
 - **Bottom bar overlaps keyboard-driven flows by design.** With the on-screen keyboard up, the nav bar rides above it via `100dvh`; the composer strip still reserves its own space.
+- **Composer anchoring is enforced against overscroll.** On phones the composer seat moves to `position: fixed` and the transcript scroller sets `overscroll-behavior-y: contain`, so pulling the chat list past its ends no longer drags the input bar along (iOS rubber-banding cannot be disabled, so the fixed seat — which the platform never displaces — is the mechanism there).
 
 ## License
 

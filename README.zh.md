@@ -131,6 +131,7 @@ None; this package neither assembles nor sends a provider request.
 - **暂无滑动手势。** 抽屉只能通过导航栏与遮罩点按开合；滑动打开/关闭是后续项。
 - **断点写死。** 768px 手机档与 Shell 的 1024px 侧边栏自动收起是相互独立的常量；平板中间态布局（如窄轨 + 详情浮层）不在覆盖范围内。
 - **底部栏与键盘联动为设计使然。** 屏幕键盘弹出时，导航栏随 `100dvh` 上移；输入区仍保留自身预留条带。
+- **输入框锚定已针对 overscroll 强化。** 手机档把输入框改为 `position: fixed`，并给会话滚动容器设置 `overscroll-behavior-y: contain`——聊天列表拉到边界时输入框不再被橡皮筋带起（iOS 无法禁用橡皮筋，故以平台永不位移的 fixed 元素作为该平台的机制）。
 
 ## License
 

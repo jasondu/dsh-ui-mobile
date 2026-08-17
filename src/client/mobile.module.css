@@ -86,6 +86,46 @@
     padding-bottom: calc(64px + env(safe-area-inset-bottom));
   }
 
+  /* ── composer stays put when the transcript overscrolls ──────────────────
+     The composer seat ([data-composer-seat]) lives INSIDE the transcript
+     scroller ([data-conversation-scroll]) as a sticky bottom element
+     (ui-conversation's ConversationRoot). When the scroller hits its top or
+     bottom edge, iOS rubber-bands the scroller's content — and a sticky
+     element, being part of that content, rides along (the composer visibly
+     jumps up). Two moves keep it anchored:
+
+     1. overscroll-behavior: contain — supported browsers (Android Chrome,
+        Edge, Firefox) stop the edge gesture from chaining up to the page,
+        so the page no longer bounces as a whole (body already sets
+        overscroll-behavior-y: none).
+     2. position: fixed — iOS Safari does NOT support overscroll-behavior,
+        but a fixed element anchors to the viewport and is never displaced
+        by rubber-banding (of any ancestor scroller). Moving the seat out of
+        layout flow requires the scroller to reserve the seat's height, which
+        ConversationRoot already publishes as --dsh-composer-height.
+  */
+  [data-mobile-role='center'] [data-conversation-scroll] {
+    overscroll-behavior-y: contain;
+  }
+
+  [data-mobile-role='center'] [data-composer-seat] {
+    position: fixed;
+    left: 0;
+    right: 0;
+    /* Sits on the reserved nav-bar strip, same constant as .centerCol's
+       padding-bottom above; the bar (z 30) and the drawer scrim (z 35) stay
+       above the seat (z 27), while the transcript content scrolls beneath. */
+    bottom: calc(64px + env(safe-area-inset-bottom));
+    z-index: 27;
+  }
+
+  /* The fixed seat no longer occupies layout space: reserve its live height
+     (ConversationRoot's seat observer keeps --dsh-composer-height current on
+     this very element) so the last message never hides behind the input. */
+  [data-mobile-role='center'] [data-conversation-scroll] {
+    padding-bottom: var(--dsh-composer-height, 152px);
+  }
+
   /* iOS zooms focused inputs smaller than 16px — force readable type so the
      composer and search fields keep their layout when focused. */
   [data-mobile-role='center'] input,
