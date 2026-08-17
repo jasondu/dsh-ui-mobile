@@ -109,14 +109,20 @@
   }
 
   [data-mobile-role='center'] [data-composer-seat] {
-    position: fixed;
+    /* !important is load-bearing on every declared property: ui-conversation's
+       `.root[data-phase='active'] .composerSeat` (specificity 0,3,0) outranks
+       this selector (0,2,0) and sets position: sticky, bottom: 0, z-index: 7.
+       Without the flags the seat lands at bottom: 0 under the nav bar (which
+       lives in the z-20 overlay layer) — the bar visibly covers the input. */
+    position: fixed !important;
     left: 0;
     right: 0;
     /* Sits on the reserved nav-bar strip, same constant as .centerCol's
-       padding-bottom above; the bar (z 30) and the drawer scrim (z 35) stay
-       above the seat (z 27), while the transcript content scrolls beneath. */
-    bottom: calc(64px + env(safe-area-inset-bottom));
-    z-index: 27;
+       padding-bottom above. */
+    bottom: calc(64px + env(safe-area-inset-bottom)) !important;
+    /* Above the nav bar (z 30) so a 1px seam can never cover the seat's edge;
+       still below the drawer scrim (z 35). */
+    z-index: 31 !important;
   }
 
   /* The fixed seat no longer occupies layout space: reserve its live height

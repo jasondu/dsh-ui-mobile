@@ -25,10 +25,14 @@ describe('mobile.module.css overscroll contract', () => {
 
   it('moves the composer seat to fixed inside the phone tier only', () => {
     expect(phoneTier).toContain('[data-mobile-role=\'center\'] [data-composer-seat]')
-    expect(phoneTier).toContain('position: fixed')
+    // !important is load-bearing on every declared property: ui-conversation's
+    // `.root[data-phase='active'] .composerSeat` (0,3,0) outranks this selector
+    // (0,2,0) with position: sticky, bottom: 0, z-index: 7 — without the flags
+    // the seat lands at bottom: 0 under the nav bar, which covers the input.
+    expect(phoneTier).toContain('position: fixed !important')
     expect(phoneTier).toContain('left: 0')
     expect(phoneTier).toContain('right: 0')
-    expect(phoneTier).toContain('bottom: calc(64px + env(safe-area-inset-bottom))')
+    expect(phoneTier).toContain('bottom: calc(64px + env(safe-area-inset-bottom)) !important')
     // The fix must not leak outside the phone tier (desktop keeps the
     // sticky composer from ui-conversation).
     expect(MOBILE_CSS.slice(0, MOBILE_CSS.indexOf('@media (max-width: 767px)'))).not.toContain('position: fixed')
@@ -38,8 +42,8 @@ describe('mobile.module.css overscroll contract', () => {
     expect(phoneTier).toContain('padding-bottom: var(--dsh-composer-height, 152px)')
   })
 
-  it('keeps the nav bar (30), install banner (28), and drawer scrim (35) above the seat (27)', () => {
-    expect(phoneTier).toContain('z-index: 27')
+  it('stacks the seat (31) above the nav bar (30) and below the scrim (35)', () => {
+    expect(phoneTier).toContain('z-index: 31 !important')
     expect(NAV_CSS).toContain('z-index: 30') // the bottom nav bar
     expect(NAV_CSS).toContain('z-index: 35') // the drawer scrim
     expect(BANNER_CSS).toContain('z-index: 28') // the PWA install banner
