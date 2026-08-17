@@ -14,6 +14,11 @@
 > `pnpm bundle` 产出 `lib/client.js`（浏览器 bundle）、node 半区及其声明
 > （`lib/index.d.ts`、`lib/invariant.d.ts`，以及手写的 `client.d.ts`）；`pnpm test` 运行 vitest 套件
 > （30 个测试，源码 100% 覆盖率）。git 安装会运行自包含的 `prepare` 脚本（`tsdown`），从 `src/` 构建上述产物。
+>
+> **发布。** 仓库内置 GitHub Actions workflow（`.github/workflows/npm-publish.yml`）：
+> 推送版本 tag（`git tag v0.1.0-rc.5 && git push origin v0.1.0-rc.5`），或在 Actions 页手动触发。
+> 预发布版本进入 `next` dist-tag，正式版本进入 `latest`。首次需在仓库配置
+> `NPM_TOKEN` secret（对 `dsh-ui-mobile` 包有发布权限的 npm token）——Settings → Secrets and variables → Actions。
 
 Web Shell 的移动端插件：在 768px 以下，三栏 AppFrame 变为单栏会话视图，配有两个离屏抽屉——侧边栏从左滑入、详情面板从右滑入——由底部拇指可达的导航栏驱动。其余一切（平板宽度、Shell 自带的 1024px 侧边栏自动收起、拖拽调宽的面板）保持不变。
 

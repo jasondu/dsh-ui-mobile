@@ -1,0 +1,69 @@
+# Publish dsh-ui-mobile to the npm registry.
+#
+# Triggered by pushing a version tag (`v*`, e.g. `git tag v0.1.0 && git push origin v0.1.0`)
+# or manually via the Actions tab. The dist-tag follows the version's shape:
+# a prerelease (contains `-`, e.g. 0.1.0-rc.5) publishes under `--tag next`,
+# anything else under `latest`.
+#
+# Setup required once in the repository:
+#   Settings → Secrets and variables → Actions → New repository secret
+#   Name: NPM_TOKEN   Value: an npm automation token (classic or granular) with
+#   publish rights for the `dsh-ui-mobile` package on your npm account.
+
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        # Emits lib/client.js (browser bundle), the node half, and the
+        # declarations; `npm publish` runs prepare again, which is idempotent.
+        run: pnpm bundle
+
+      - name: Check the publishable package surface
+        # publint catches broken exports/types/files; runs from a fresh cache,
+        # so it needs no devDependency entry.
+        run: pnpm dlx publint
+
+      - name: Resolve dist-tag from the package version
+        id: dist-tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ "$VERSION" == *-* ]]; then
+            TAG=next
+          else
+            TAG=latest
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to npm
+        run: npm publish --tag ${{ steps.dist-tag.outputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

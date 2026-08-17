@@ -17,6 +17,12 @@ English | [中文](README.zh.md)
 > declarations (`lib/index.d.ts`, `lib/invariant.d.ts`, and the hand-written `client.d.ts`);
 > `pnpm test` runs the vitest suites (30 tests, 100% source coverage). Git installs run the
 > self-contained `prepare` script (`tsdown`) to build those entries from `src/`.
+>
+> **Publishing.** The repo ships a GitHub Actions workflow (`.github/workflows/npm-publish.yml`):
+> push a version tag (`git tag v0.1.0-rc.5 && git push origin v0.1.0-rc.5`) or trigger it from
+> the Actions tab. Prerelease versions go to the `next` dist-tag, release versions to `latest`.
+> Configure the `NPM_TOKEN` repository secret (an npm token with publish rights for
+> `dsh-ui-mobile`) once — Settings → Secrets and variables → Actions.
 
 Mobile plugin for the Web shell: below 768px the three-column AppFrame becomes a single conversation column with two off-canvas drawers — the sidebar slides in from the left and the details panel from the right — driven by a thumb-reachable bottom nav bar. Everything else (tablet widths, the shell's own 1024px sidebar auto-collapse, drag-resized panels) is untouched.
 
