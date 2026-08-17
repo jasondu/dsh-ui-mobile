@@ -12,9 +12,10 @@
 ## 特性
 
 - **手机优先的 Shell**——768px 以下框架变为占满屏幕的单栏会话视图。
-- **离屏抽屉**——侧边栏抽屉（`min(84vw, 340px)`）滑入会话之上，点按背后的遮罩即可关闭。
+- **离屏抽屉**——侧边栏抽屉（`min(84vw, 340px)`）滑入会话之上，点按背后的遮罩即可关闭；从左侧 24px 边缘向右滑可打开已收起的侧边栏。
 - **头部菜单按钮**——纯图标侧边栏开关注册进会话头部标题左侧的增量式条带（`conversation.session.header.left`，additive list 槽），可组合进出、随插件卸载；另有点击遮罩关闭抽屉。
 - **触屏优先细节**——`100dvh` 挂载（跟随地址栏与键盘显隐）、安全区感知的底部内边距、16px 输入字号（避免 iOS 对输入区自动缩放）、`touch-action: manipulation`、`overscroll-behavior-y: none`、`prefers-reduced-motion` 支持。
+- **聚焦手机工具栏**——768px 以下隐藏 Session log 下载入口，并把 Access mode 控件放到输入栏最右侧。
 - **手机端键盘克制**——打开命令面板不再弹出屏幕键盘（插件拦截面板的脚本聚焦搜索框）。配套的手机档行为——点按钮/切换会话不自动聚焦输入框——位于 ui-conversation；使用带这些修复的宿主 DSH 可获得最完整效果。
 - **PWA 安装引导**——Chrome/Edge Android 在浏览器可安装时显示安装入口；iOS Safari 显示一次"添加到主屏幕"提示。从主屏幕启动时无浏览器外壳（见下文）。
 - **零 Shell 改动**——插件只读取已装配的 DOM，从不重写框架；一行 cordis 配置即可组合进/出。
@@ -59,7 +60,9 @@ npm install dsh-ui-mobile@next
 在手机（或窄浏览器窗口）上，GUI 自动重排，无需任何配置：
 
 - **菜单**（会话头部最左侧的图标）开合侧边栏抽屉。
+- 从屏幕左侧边缘向右滑也可打开已收起的侧边栏；纵向拖动与非边缘滑动仍按页面原有手势处理。
 - 抽屉打开时背后出现深色遮罩，点按抽屉外任意处即可关闭。
+- 手机上的 Session log 下载按钮会隐藏，Access mode 位于输入栏最右侧。
 - 输入区直接贴屏幕底部（无底部导航栏），随平台键盘行为上移。
 
 桌面与平板宽度保持原有三栏布局、拖拽把手与侧边栏自动收起行为不变。
@@ -81,15 +84,15 @@ npm install dsh-ui-mobile@next
 插件从不重写框架，而是读取已装配的 DOM。框架的列类名经 CSS Modules 哈希，其他插件无法触及，
 因此 `MobileFrameController` 通过框架自身的 `data-shell-overlay` 子元素定位 AppFrame，为三个网格列
 打上稳定的 `data-mobile-role` 属性，并把框架的 `data-sidebar-collapsed` / `data-details-collapsed`
-翻转以及手机档 `matchMedia` 查询镜像为一份响应式快照。
+翻转以及手机档 `matchMedia` 查询镜像为一份响应式快照。控制器还会为既有的 Session log 与 Access mode 控件补打可移植属性，因此兼容宿主即使尚未自行提供这些属性，也能应用紧凑工具栏规则。
 
 响应式样式表（`mobile.module.css`，副作用导入）仅用属性选择器重构框架：以 `!important` 的
 `minmax(0, 1fr)` 网格轨道压过框架的内联像素模板，抽屉以 `position: fixed` 层脱离网格流，拖拽把手
 隐藏，输入区以 fixed 贴屏幕底部，会话滚动区为其预留实时高度。
 
-导航栏注册进框架的 `shell.overlay` 列表槽（`id: 'mobile-nav'`）——增量式、默认点击穿透、随插件
-fiber 卸载。其 inject 面把两个按钮绑定到 `ctx.layout` 的面板动作（`toggleSidebar` /
-`openDetails` / `closeDetails`）以及控制器的订阅/快照对；打开的抽屉背后有遮罩，点按即关闭。
+`EdgeSwipeController` 只识别从手机屏幕左侧 24px 开始、向右越过阈值的一次性手势；不采用抽屉逐帧跟手，避免增加布局开销。
+
+头部菜单按钮注册进会话头部标题左侧条带（`conversation.session.header.left`），抽屉遮罩注册进框架的 `shell.overlay` 列表槽——两者均为增量式并随插件 fiber 卸载。共享 inject 面将它们绑定到 `ctx.layout` 的 `toggleSidebar` 与控制器的订阅/快照对；打开抽屉后点按遮罩即可关闭。
 
 ## 开发
 
@@ -129,7 +132,7 @@ None; this package neither assembles nor sends a provider request.
 ## 已知限制与路线图
 
 - **抽屉仅由 CSS 实现，手机端无法拖拽调宽。** 768px 以下隐藏了框架的拖拽把手，抽屉宽度固定（侧边栏 `min(84vw, 340px)`，详情最大 480px）；手机端面板调宽留待后续。
-- **暂无滑动手势。** 抽屉只能通过导航栏与遮罩点按开合；滑动打开/关闭是后续项。
+- **仅支持左边缘打开。** 滑动可打开已收起的侧边栏；关闭仍通过遮罩点按或头部按钮，暂不支持滑动关闭。
 - **断点写死。** 768px 手机档与 Shell 的 1024px 侧边栏自动收起是相互独立的常量；平板中间态布局（如窄轨 + 详情浮层）不在覆盖范围内。
 - **已无底部导航栏。** 输入区直接贴屏幕底部；iOS 上 `position: fixed` 底部元素跟随键盘的行为取决于平台（已知 iOS 怪癖——见上文输入框锚定说明）。
 - **输入框锚定已针对 overscroll 强化。** 手机档把输入框改为 `position: fixed`，并给会话滚动容器设置 `overscroll-behavior-y: contain`——聊天列表拉到边界时输入框不再被橡皮筋带起（iOS 无法禁用橡皮筋，故以平台永不位移的 fixed 元素作为该平台的机制）。

@@ -55,4 +55,16 @@ describe('mobile.module.css overscroll contract', () => {
     expect(MENU_CSS).toContain('@media (min-width: 768px)')
     expect(MENU_CSS).toContain('display: none')
   })
+
+  it('hides session-log download and places access mode at the phone toolbar edge', () => {
+    expect(phoneTier).toContain('[data-session-log-download]')
+    expect(phoneTier).toContain('display: none')
+    expect(phoneTier).toContain('[data-composer-tools]')
+    expect(phoneTier).toContain('[data-composer-modes]')
+    expect(phoneTier).toContain('[data-composer-trailing]')
+    expect(phoneTier).toContain('display: contents')
+    expect(phoneTier).toContain('[data-input-access-mode]')
+    expect(phoneTier).toContain('order: 1')
+    expect(phoneTier).toContain('margin-left: auto')
+  })
 })
