@@ -15,6 +15,7 @@
 - **离屏抽屉**——侧边栏抽屉（`min(84vw, 340px)`）滑入会话之上，点按背后的遮罩即可关闭。
 - **头部菜单按钮**——纯图标侧边栏开关注册进会话头部标题左侧的增量式条带（`conversation.session.header.left`，additive list 槽），可组合进出、随插件卸载；另有点击遮罩关闭抽屉。
 - **触屏优先细节**——`100dvh` 挂载（跟随地址栏与键盘显隐）、安全区感知的底部内边距、16px 输入字号（避免 iOS 对输入区自动缩放）、`touch-action: manipulation`、`overscroll-behavior-y: none`、`prefers-reduced-motion` 支持。
+- **手机端键盘克制**——打开命令面板不再弹出屏幕键盘（插件拦截面板的脚本聚焦搜索框）。配套的手机档行为——点按钮/切换会话不自动聚焦输入框——位于 ui-conversation；使用带这些修复的宿主 DSH 可获得最完整效果。
 - **PWA 安装引导**——Chrome/Edge Android 在浏览器可安装时显示安装入口；iOS Safari 显示一次"添加到主屏幕"提示。从主屏幕启动时无浏览器外壳（见下文）。
 - **零 Shell 改动**——插件只读取已装配的 DOM，从不重写框架；一行 cordis 配置即可组合进/出。
 

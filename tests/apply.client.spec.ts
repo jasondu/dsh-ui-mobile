@@ -113,12 +113,13 @@ describe('ui-mobile apply', () => {
     unsubscribe()
   })
 
-  it('stops both controllers and both slot contributions on teardown', () => {
+  it('stops both controllers, the keyboard guard, and both slot contributions on teardown', () => {
     mountFrame()
     const { ctx, disposers, slotDisposers } = makeCtx()
     apply(ctx)
-    expect(disposers).toHaveLength(1)
-    expect(() => disposers[0]!()).not.toThrow()
+    // One effect for the controllers, one for the command-panel keyboard guard.
+    expect(disposers).toHaveLength(2)
+    for (const disposer of disposers) expect(() => disposer()).not.toThrow()
     // One slots.inject contribution per surface: header.left and shell.overlay.
     expect(slotDisposers).toHaveLength(2)
     for (const disposer of slotDisposers) expect(() => disposer()).not.toThrow()

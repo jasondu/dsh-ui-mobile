@@ -15,6 +15,7 @@ Below **768px** the Web GUI's three-column layout becomes a single conversation 
 - **Off-canvas drawers** — the sidebar drawer (`min(84vw, 340px)`) and the details drawer (up to 480px) slide in over the conversation and close with a tap on the scrim behind them.
 - **Header menu toggle** — an icon-only sidebar toggle registers into the session header's left-of-title strip (`conversation.session.header.left`, an additive list seat), so it composes in and out and tears down with the plugin; a tap-outside scrim closes the drawer.
 - **Touch-first hygiene** — `100dvh` mounting (follows the URL bar and keyboard), safe-area-aware bottom padding, 16px inputs so iOS never zooms the composer, `touch-action: manipulation`, `overscroll-behavior-y: none`, and `prefers-reduced-motion` support.
+- **Keyboard restraint on phones** — opening the command panel never pops the on-screen keyboard (the plugin blurs the panel's script-driven search focus). The companion phone-tier behavior — not auto-focusing the composer on button taps or session switch — lives in ui-conversation; use a host DSH carrying those fixes for the fullest effect.
 - **PWA install promotion** — on Chrome/Edge Android an install CTA appears while the browser offers installation; on iOS Safari a one-time "add to home screen" hint shows. Home-screen launches run without browser chrome (see below).
 - **Zero shell changes** — the plugin reads the assembled DOM and never re-implements the frame; one cordis row composes it in or out.
 

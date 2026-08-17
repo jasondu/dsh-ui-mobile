@@ -22,6 +22,7 @@ import { InstallBanner, type InstallBannerInjected } from './InstallBanner.tsx'
 import { HeaderMenuButton, type HeaderMenuButtonInjected } from './HeaderMenuButton.tsx'
 import { DrawerScrim, type DrawerScrimInjected } from './DrawerScrim.tsx'
 import { registerServiceWorker } from './sw.ts'
+import { suppressCommandPanelScriptFocus } from './command-focus.ts'
 import './mobile.module.css'
 
 export type { HeaderMenuButtonInjected } from './HeaderMenuButton.tsx'
@@ -51,6 +52,10 @@ export function apply(ctx: ClientContext): void {
       install.stop()
     }
   }, 'ui-mobile: frame stabilization + install controller')
+
+  // Command-panel keyboard guard: phone tier only, so it never disturbs the
+  // desktop combobox behavior; see command-focus.ts.
+  ctx.effect(() => suppressCommandPanelScriptFocus(), 'ui-mobile: command panel keyboard guard')
 
   // Shared inject face for the two drawer-control surfaces (header toggle and
   // the tap-outside scrim): the same frame snapshot + the sidebar toggle.
