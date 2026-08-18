@@ -47,6 +47,7 @@ const ICONS: Record<string, string> = {
 
 /** The head fragment injected into every served index.html. */
 const HEAD_INJECTION = [
+  '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />',
   '<link rel="manifest" href="/pwa/manifest.webmanifest" />',
   '<meta name="mobile-web-app-capable" content="yes" />',
   '<meta name="apple-mobile-web-app-capable" content="yes" />',
@@ -175,6 +176,7 @@ async function serveSw(req: IncomingMessage, res: ServerResponse): Promise<void>
 /** Drop host-declared PWA tags so the plugin's injected ones win. */
 function stripHostPwa(html: string): string {
   return html
+    .replace(/<meta\b[^>]*\bname="viewport"[^>]*>/gi, '')
     .replace(/<link\b[^>]*\brel="manifest"[^>]*>/gi, '')
     .replace(/<meta\b[^>]*\bname="(?:mobile-web-app-capable|apple-mobile-web-app-capable|apple-mobile-web-app-status-bar-style|apple-mobile-web-app-title)"[^>]*>/gi, '')
     .replace(/<link\b[^>]*\brel="apple-touch-icon"[^>]*>/gi, '')

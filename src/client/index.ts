@@ -27,6 +27,7 @@ import { DrawerScrim, type DrawerScrimInjected } from './DrawerScrim.tsx'
 import { registerServiceWorker } from './sw.ts'
 import { suppressCommandPanelScriptFocus } from './command-focus.ts'
 import { enableMobileEnterSend } from './mobile-enter-send.ts'
+import { lockMobilePageZoom } from './page-zoom-lock.ts'
 import { PushController } from './push.ts'
 import { PushPrompt, type PushPromptInjected } from './PushPrompt.tsx'
 import './mobile.module.css'
@@ -71,6 +72,7 @@ export function apply(ctx: ClientContext): void {
   // desktop combobox behavior; see command-focus.ts.
   ctx.effect(() => suppressCommandPanelScriptFocus(), 'ui-mobile: command panel keyboard guard')
   ctx.effect(() => enableMobileEnterSend(), 'ui-mobile: keyboard send action')
+  ctx.effect(() => lockMobilePageZoom(), 'ui-mobile: page zoom lock')
 
   // Shared inject face for the two drawer-control surfaces (header toggle and
   // the tap-outside scrim): the same frame snapshot + the sidebar toggle.

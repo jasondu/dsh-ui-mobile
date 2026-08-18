@@ -45,6 +45,13 @@ describe('mobile.module.css overscroll contract', () => {
     expect(phoneTier).toContain('padding-bottom: var(--dsh-composer-height, 152px)')
   })
 
+  it('widens only the phone chat flow to reduce transcript side whitespace', () => {
+    expect(phoneTier).toContain("[data-mobile-role='center'] [data-chat-flow]")
+    expect(phoneTier).toContain('width: calc(100% + 40px)')
+    expect(phoneTier).toContain('margin-right: -20px')
+    expect(phoneTier).toContain('margin-left: -20px')
+  })
+
   it('stacks the scrim (35) above the seat (31); the install banner sits at top right', () => {
     expect(phoneTier).toContain('z-index: 31 !important')
     expect(SCRIM_CSS).toContain('z-index: 35') // the drawer scrim
@@ -65,6 +72,15 @@ describe('mobile.module.css overscroll contract', () => {
 
   it('uses a compact sidebar drawer width on phones', () => {
     expect(phoneTier).toContain('width: min(78vw, 300px)')
+  })
+
+  it('paints the iOS safe-area canvas with the header base surface', () => {
+    expect(phoneTier).toContain('html,\n  body {\n    background: var(--dsw-alias-bg-base)')
+  })
+
+  it('suppresses desktop-hover tooltips on touch-only phone controls', () => {
+    expect(phoneTier).toContain("[role='tooltip']")
+    expect(phoneTier).toContain('display: none !important')
   })
 
   it('hides session-log download and places access mode at the phone toolbar edge', () => {

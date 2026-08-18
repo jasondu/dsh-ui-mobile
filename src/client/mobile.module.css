@@ -19,6 +19,14 @@
     height: 100dvh;
   }
 
+  /* In an iOS standalone window the status-bar/Island area is part of the
+     covered viewport. Header chrome is transparent and sits on the base
+     surface, so paint that same theme-aware base onto the page canvas. */
+  html,
+  body {
+    background: var(--dsw-alias-bg-base);
+  }
+
   body {
     /* Keep the app's own scroll containers in control of pull gestures. */
     overscroll-behavior-y: none;
@@ -26,6 +34,13 @@
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* The host tooltips are designed for desktop hover. On iOS a tap focuses
+     the icon button and surfaces the same bubble ("命令" / "发送消息") as a
+     distracting toast; labels remain available through aria-label. */
+  [role='tooltip'] {
+    display: none !important;
   }
 
   /* Single-column frame: the conversation fills the screen. The inline px
@@ -136,6 +151,16 @@
      this very element) so the last message never hides behind the input. */
   [data-mobile-role='center'] [data-conversation-scroll] {
     padding-bottom: var(--dsh-composer-height, 152px);
+  }
+
+  /* The host transcript keeps the desktop composition rule of composer
+     clearance + 16px on each side (32px at the default). On a phone that
+     leaves the chat unnecessarily narrow, so widen only the message flow to
+     a comfortable 12px edge inset. The composer keeps its existing clearance. */
+  [data-mobile-role='center'] [data-chat-flow] {
+    width: calc(100% + 40px);
+    margin-right: -20px;
+    margin-left: -20px;
   }
 
   /* iOS zooms focused inputs smaller than 16px — force readable type so the

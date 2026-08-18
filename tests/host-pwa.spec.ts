@@ -144,6 +144,7 @@ describe('ui-mobile host half', () => {
 
   it('injects the manifest link, iOS meta, and apple-touch-icon after <head>', () => {
     const out = indexTap()('<!doctype html>\n<html><head><meta charset="utf-8" /></head><body><div id="root"></div></body></html>')
+    expect(out).toContain('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />')
     expect(out).toContain('<link rel="manifest" href="/pwa/manifest.webmanifest" />')
     expect(out).toContain('<meta name="apple-mobile-web-app-capable" content="yes" />')
     expect(out).toContain('<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />')
@@ -172,6 +173,7 @@ describe('ui-mobile host half', () => {
 
   it('strips host-declared PWA tags so the plugin ones win', () => {
     const host = '<html><head>'
+      + '<meta name="viewport" content="width=device-width, initial-scale=1" />'
       + '<link rel="manifest" href="/manifest.webmanifest" />'
       + '<meta name="apple-mobile-web-app-capable" content="yes" />'
       + '<meta name="apple-mobile-web-app-status-bar-style" content="default" />'
@@ -179,6 +181,8 @@ describe('ui-mobile host half', () => {
       + '<link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" />'
       + '</head><body><div id="root"></div></body></html>'
     const out = indexTap()(host)
+    expect(out).not.toContain('content="width=device-width, initial-scale=1" />')
+    expect(out).toContain('maximum-scale=1, user-scalable=no')
     expect(out).not.toContain('href="/manifest.webmanifest"')
     expect(out).not.toContain('content="default"')
     expect(out).not.toContain('content="Other"')
