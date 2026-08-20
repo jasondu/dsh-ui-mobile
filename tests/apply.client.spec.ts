@@ -8,6 +8,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apply, inject } from '../src/client/index.ts'
 import { HeaderMenuButton, type HeaderMenuButtonInjected } from '../src/client/HeaderMenuButton.tsx'
 import { NewSessionMenuButton, type NewSessionMenuButtonInjected } from '../src/client/NewSessionMenuButton.tsx'
+import { ConversationNavigator, type ConversationNavigatorInjected } from '../src/client/ConversationNavigator.tsx'
+import { BackToBottom } from '../src/client/BackToBottom.tsx'
 import { DrawerScrim, type DrawerScrimInjected } from '../src/client/DrawerScrim.tsx'
 import { InstallBanner, type InstallBannerInjected } from '../src/client/InstallBanner.tsx'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
@@ -74,7 +76,7 @@ describe('ui-mobile apply', () => {
     const frame = mountFrame()
     const { ctx, registrations } = makeCtx()
     apply(ctx)
-    expect(registrations.map(r => r.component)).toEqual([HeaderMenuButton, DrawerScrim, NewSessionMenuButton, InstallBanner])
+    expect(registrations.map(r => r.component)).toEqual([HeaderMenuButton, DrawerScrim, NewSessionMenuButton, ConversationNavigator, BackToBottom, InstallBanner])
     expect(frame.hasAttribute('data-mobile-frame')).toBe(true)
   })
 
@@ -98,6 +100,15 @@ describe('ui-mobile apply', () => {
     const face = byComponent<NewSessionMenuButtonInjected>(NewSessionMenuButton)!
     face.toggleSidebar()
     expect(layout.toggleSidebar).toHaveBeenCalledTimes(1)
+  })
+
+  it('binds the conversation navigator to the shared mobile frame', () => {
+    mountFrame()
+    const { ctx, byComponent } = makeCtx()
+    apply(ctx)
+    const face = byComponent<ConversationNavigatorInjected>(ConversationNavigator)!
+    expect(face.frame.snapshot().mobile).toBe(false)
+    expect(face.navigator.snapshot().waypoints).toEqual([])
   })
 
   it('binds the drawer scrim to the same sidebar toggle and snapshot', () => {
