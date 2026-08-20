@@ -146,6 +146,13 @@
     z-index: 31 !important;
   }
 
+  /* The host's sticky button loses hit-testing under the fixed composer.
+     Mobile renders a plugin-owned equivalent in the overlay instead. */
+  [data-mobile-role='center'] button[aria-label='回到底部'],
+  [data-mobile-role='center'] button[aria-label='Back to bottom'] {
+    display: none;
+  }
+
   /* The fixed seat no longer occupies layout space: reserve its live height
      (ConversationRoot's seat observer keeps --dsh-composer-height current on
      this very element) so the last message never hides behind the input. */

@@ -23,6 +23,8 @@ import { InstallController } from './install.ts'
 import { InstallBanner, type InstallBannerInjected } from './InstallBanner.tsx'
 import { HeaderMenuButton, type HeaderMenuButtonInjected } from './HeaderMenuButton.tsx'
 import { NewSessionMenuButton, type NewSessionMenuButtonInjected } from './NewSessionMenuButton.tsx'
+import { ConversationNavigator, type ConversationNavigatorInjected } from './ConversationNavigator.tsx'
+import { BackToBottom, type BackToBottomInjected } from './BackToBottom.tsx'
 import { DrawerScrim, type DrawerScrimInjected } from './DrawerScrim.tsx'
 import { registerServiceWorker } from './sw.ts'
 import { suppressCommandPanelScriptFocus } from './command-focus.ts'
@@ -30,10 +32,13 @@ import { enableMobileEnterSend } from './mobile-enter-send.ts'
 import { lockMobilePageZoom } from './page-zoom-lock.ts'
 import { PushController } from './push.ts'
 import { PushPrompt, type PushPromptInjected } from './PushPrompt.tsx'
+import { ConversationNavigatorController } from './conversation-navigator.ts'
 import './mobile.module.css'
 
 export type { HeaderMenuButtonInjected } from './HeaderMenuButton.tsx'
 export type { NewSessionMenuButtonInjected } from './NewSessionMenuButton.tsx'
+export type { ConversationNavigatorInjected } from './ConversationNavigator.tsx'
+export type { BackToBottomInjected } from './BackToBottom.tsx'
 export type { DrawerScrimInjected } from './DrawerScrim.tsx'
 export type { MobileNavState } from './frame.ts'
 export type { InstallBannerInjected } from './InstallBanner.tsx'
@@ -53,16 +58,19 @@ export function apply(ctx: ClientContext): void {
   registerServiceWorker()
   const controller = new MobileFrameController()
   const edgeSwipe = new EdgeSwipeController(controller, () => ctx.layout.toggleSidebar())
+  const navigator = new ConversationNavigatorController()
   const install = new InstallController()
   const push = new PushController(sessionId => { ctx.sessions.open(sessionId as never) })
   ctx.effect(() => {
     controller.start()
     edgeSwipe.start()
+    navigator.start()
     install.start()
     void push.start()
     return () => {
       controller.stop()
       edgeSwipe.stop()
+      navigator.stop()
       install.stop()
       push.stop()
     }
@@ -102,6 +110,14 @@ export function apply(ctx: ClientContext): void {
       name: 'shell.overlay', id: 'mobile-new-session-menu', order: 89, label: '新会话菜单',
       inject: (): NewSessionMenuButtonInjected => drawerControls(),
     }, NewSessionMenuButton)
+    const registerConversationNavigator = ctx.slots.register({
+      name: 'shell.overlay', id: 'mobile-conversation-navigator', order: 88, label: '会话导览',
+      inject: (): ConversationNavigatorInjected => ({ navigator, frame: controller }),
+    }, ConversationNavigator)
+    const registerBackToBottom = ctx.slots.register({
+      name: 'shell.overlay', id: 'mobile-back-to-bottom', order: 87, label: '回到底部',
+      inject: (): BackToBottomInjected => ({ frame: controller }),
+    }, BackToBottom)
     const registerBanner = ctx.slots.register({
       name: 'shell.overlay',
       id: 'mobile-install',
@@ -121,6 +137,8 @@ export function apply(ctx: ClientContext): void {
     return () => {
       registerScrim()
       registerNewSessionMenu()
+      registerConversationNavigator()
+      registerBackToBottom()
       registerBanner()
       registerPushPrompt()
     }

@@ -1,0 +1,21 @@
+.button {
+  position: fixed;
+  right: 16px;
+  bottom: calc(var(--dsh-composer-height, 152px) + 16px);
+  z-index: 34;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 99px;
+  background: var(--dsw-alias-button-floating-fill);
+  color: var(--dsw-alias-label-primary);
+  box-shadow: var(--dsw-shadow-lv2);
+  touch-action: manipulation;
+  cursor: pointer;
+}
+.button:active { background: var(--dsw-alias-button-floating-hover); }
+@media (min-width: 768px) { .button { display: none; } }

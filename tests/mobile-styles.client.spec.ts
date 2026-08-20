@@ -16,6 +16,7 @@ const SCRIM_CSS = readFileSync(fileURLToPath(new URL('../src/client/DrawerScrim.
 const BANNER_CSS = readFileSync(fileURLToPath(new URL('../src/client/InstallBanner.module.css', import.meta.url)), 'utf8')
 const MENU_CSS = readFileSync(fileURLToPath(new URL('../src/client/HeaderMenuButton.module.css', import.meta.url)), 'utf8')
 const NEW_SESSION_MENU_CSS = readFileSync(fileURLToPath(new URL('../src/client/NewSessionMenuButton.module.css', import.meta.url)), 'utf8')
+const NAVIGATOR_CSS = readFileSync(fileURLToPath(new URL('../src/client/ConversationNavigator.module.css', import.meta.url)), 'utf8')
 
 /** Everything between the phone-tier media query opener and the end of the file. */
 const phoneTier = MOBILE_CSS.slice(MOBILE_CSS.indexOf('@media (max-width: 767px)'))
@@ -39,6 +40,12 @@ describe('mobile.module.css overscroll contract', () => {
     // The fix must not leak outside the phone tier (desktop keeps the
     // sticky composer from ui-conversation).
     expect(MOBILE_CSS.slice(0, MOBILE_CSS.indexOf('@media (max-width: 767px)'))).not.toContain('position: fixed')
+  })
+
+  it('hides the host back-to-bottom control in favor of the plugin-owned button', () => {
+    expect(phoneTier).toContain("button[aria-label='回到底部']")
+    expect(phoneTier).toContain("button[aria-label='Back to bottom']")
+    expect(phoneTier).toContain('display: none')
   })
 
   it('reserves the seat height so the last message is not hidden behind the input', () => {
@@ -81,6 +88,13 @@ describe('mobile.module.css overscroll contract', () => {
   it('suppresses desktop-hover tooltips on touch-only phone controls', () => {
     expect(phoneTier).toContain("[role='tooltip']")
     expect(phoneTier).toContain('display: none !important')
+  })
+
+  it('keeps the conversation navigator compact and phone-only', () => {
+    expect(NAVIGATOR_CSS).toContain('left: 5px')
+    expect(NAVIGATOR_CSS).toContain('width: 16px')
+    expect(NAVIGATOR_CSS).toContain('@media (min-width: 768px)')
+    expect(NAVIGATOR_CSS).toContain('display: none')
   })
 
   it('hides session-log download and places access mode at the phone toolbar edge', () => {
